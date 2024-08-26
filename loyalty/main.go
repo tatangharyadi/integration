@@ -23,5 +23,6 @@ func main() {
 	}
 	r.Mount("/voucherify", rs.Routes())
 
-	http.ListenAndServe(":8080", r)
+	addr := ":" + env.AppPort
+	http.ListenAndServe(addr, r)
 }
