@@ -4,10 +4,12 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+
+	"github.com/go-chi/chi/v5"
 )
 
 func (rs VoucherifyResource) GetCustomer(w http.ResponseWriter, r *http.Request) {
-	customerId := "cust_rImiBoXHZh1ivNX1dvbr5cqd"
+	customerId := chi.URLParam(r, "customerId")
 	url := fmt.Sprintf("https://as1.api.voucherify.io/v1/customers/%s", customerId)
 	client := &http.Client{}
 	req, err := http.NewRequest("GET", url, nil)

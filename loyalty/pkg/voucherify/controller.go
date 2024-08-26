@@ -12,6 +12,6 @@ type VoucherifyResource struct {
 func (rs VoucherifyResource) Routes() chi.Router {
 	r := chi.NewRouter()
 
-	r.Get("/getcustomer", rs.GetCustomer)
+	r.Get("/getcustomer/{customerId}", rs.GetCustomer)
 	return r
 }
