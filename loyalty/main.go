@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	env := config.InitEnv()
+	env, log := config.InitEnv()
 
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
@@ -20,6 +20,7 @@ func main() {
 
 	rs := voucherify.VoucherifyResource{
 		Env: env,
+		Log: log,
 	}
 	r.Mount("/voucherify", rs.Routes())
 

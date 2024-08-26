@@ -1,7 +1,10 @@
 package config
 
 import (
-	"github.com/rs/zerolog/log"
+	"os"
+	"time"
+
+	"github.com/rs/zerolog"
 	"github.com/spf13/viper"
 )
 
@@ -12,7 +15,15 @@ type Env struct {
 	VoucherifySecretKey string `mapstructure:"VOUCHERIFY_SECRET_KEY"`
 }
 
-func InitEnv() *Env {
+var log zerolog.Logger
+
+func InitEnv() (*Env, zerolog.Logger) {
+	output := zerolog.ConsoleWriter{Out: os.Stdout, TimeFormat: time.RFC3339}
+	log = zerolog.New(output).
+		Level(zerolog.Level(zerolog.InfoLevel)).
+		With().Timestamp().
+		Logger()
+
 	env := Env{}
 	viper.SetConfigFile(".env")
 
@@ -30,5 +41,5 @@ func InitEnv() *Env {
 		log.Info().Msgf("DEV mode:%s", env.AppPort)
 	}
 
-	return &env
+	return &env, log
 }
