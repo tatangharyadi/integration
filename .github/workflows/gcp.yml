@@ -1,5 +1,5 @@
 ---
-    name: Build and Push Image to GCP Cloud Run
+    name: CI/CD GCP Cloud Run
     on:
       push:
         branches:
@@ -9,6 +9,7 @@
       workflow_dispatch:
     
     env:
+      CONTEXT: './loyalty'
       PROJECT_ID: ${{ vars.PROJECT_ID }}
       GAR_LOCATION: ${{ vars.GAR_LOCATION }}
       REPOSITORY: ${{ vars.REPOSITORY }}
@@ -45,7 +46,7 @@
           id: build-image
           uses: docker/build-push-action@v6
           with:
-            context: './loyalty'
+            context: ${{ env.CONTEXT }}
             file: ${{ matrix.dockerfile }}
             push: true
             tags: |
