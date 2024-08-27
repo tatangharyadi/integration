@@ -26,6 +26,9 @@
           uses: google-github-actions/auth@v2
           with:
             credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
+
+        - name: Dockerfile
+          run: echo "Dockerfile"
     
         - name: Docker Auth
           id: docker-auth
