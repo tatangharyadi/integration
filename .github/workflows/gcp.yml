@@ -6,6 +6,7 @@
             - main
         paths:
             - 'loyalty/**'
+      workflow_dispatch:
     
     env:
       PROJECT_ID: ${{ vars.PROJECT_ID }}
