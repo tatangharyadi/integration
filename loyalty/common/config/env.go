@@ -25,18 +25,18 @@ func InitEnv() (*Env, zerolog.Logger) {
 		Logger()
 
 	env := Env{}
-	viper.SetConfigFile(".env")
+	// viper.SetConfigFile(".env")
 	viper.AutomaticEnv()
 
-	err := viper.ReadInConfig()
-	if err != nil {
-		log.Info().Msg("Error reading .env file")
-	}
+	// err := viper.ReadInConfig()
+	// if err != nil {
+	// 	log.Error().Msg("Error reading .env file")
+	// }
 
-	err = viper.Unmarshal(&env)
-	if err != nil {
-		log.Info().Msg("Error unmarshalling .env file")
-	}
+	// err = viper.Unmarshal(&env)
+	// if err != nil {
+	// 	log.Error().Msg("Error unmarshalling .env file")
+	// }
 
 	if env.AppEnv == "DEV" {
 		log.Info().Msgf("DEV mode:%s", env.AppPort)
