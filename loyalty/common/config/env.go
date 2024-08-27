@@ -30,12 +30,12 @@ func InitEnv() (*Env, zerolog.Logger) {
 
 	err := viper.ReadInConfig()
 	if err != nil {
-		log.Fatal().Msg("Error reading .env file")
+		log.Info().Msg("Error reading .env file")
 	}
 
 	err = viper.Unmarshal(&env)
 	if err != nil {
-		log.Fatal().Msg("Error unmarshalling .env file")
+		log.Info().Msg("Error unmarshalling .env file")
 	}
 
 	if env.AppEnv == "DEV" {
