@@ -42,10 +42,14 @@
             password: ${{ secrets.GCP_CREDENTIALS }}
     
         - name: Build and Push Image
-          run: |-
-            docker build -t "${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.SERVICE }}:${{ github.sha }}" \
-              --build-arg GH_ACCESS_TOKEN=${{ secrets.GH_ACCESS_TOKEN }} ./
-            docker push "${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.SERVICE }}:${{ github.sha }}"
+          id: build-image
+          uses: docker/build-push-action@v6
+          with:
+            context: .
+            file: ${{ matrix.dockerfile }}
+            push: true
+            tags: |
+              ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.SERVICE }}:${{ github.sha }}
         
         - name: Deploy to Cloud run
           id: deploy
