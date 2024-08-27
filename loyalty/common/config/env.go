@@ -26,6 +26,7 @@ func InitEnv() (*Env, zerolog.Logger) {
 
 	env := Env{}
 	viper.SetConfigFile(".env")
+	viper.AutomaticEnv()
 
 	err := viper.ReadInConfig()
 	if err != nil {
@@ -39,6 +40,10 @@ func InitEnv() (*Env, zerolog.Logger) {
 
 	if env.AppEnv == "DEV" {
 		log.Info().Msgf("DEV mode:%s", env.AppPort)
+	}
+
+	if env.AppEnv == "PROD" {
+		log.Info().Msgf("PROD mode:%s", env.AppPort)
 	}
 
 	return &env, log
