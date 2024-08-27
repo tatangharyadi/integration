@@ -10,6 +10,7 @@
     
     env:
       CONTEXT: './loyalty'
+      SERVICE_TEMPLATE: './loyalty/service.template.yaml'
       PROJECT_ID: ${{ vars.PROJECT_ID }}
       GAR_LOCATION: ${{ vars.GAR_LOCATION }}
       REPOSITORY: ${{ vars.REPOSITORY }}
@@ -56,7 +57,7 @@
           run: |-
             export IMAGE="${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.SERVICE }}:${{ github.sha }}"
             export SERVICE="${{ env.SERVICE }}"
-            envsubst < ./loyalty/service.template.yaml > service.yaml
+            envsubst < ${{ env.SERVICE_TEMPLATE }}" > service.yaml
 
         - name: Deploy to Cloud run
           id: deploy
