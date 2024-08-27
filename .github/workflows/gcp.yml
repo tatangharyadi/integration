@@ -54,7 +54,7 @@
         
         - name: Create Service Declaration
           run: |-
-            export IMAGE="${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.SERVICE }}:${{ github.sha }}"
+            export IMAGE="${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.SERVICE }}:${{ github.sha }}"
             export SERVICE="${{ env.SERVICE }}"
             envsubst < ./loyalty/service.template.yaml > service.yaml
 
@@ -64,7 +64,7 @@
           with:
             service: ${{ env.SERVICE }}
             region: ${{ env.REGION }}
-            image: ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.SERVICE }}:${{ github.sha }}
+            metadata: service.yaml
     
         - name: Show Output
           run: echo ${{ steps.deploy.outputs.url }}                  
