@@ -39,12 +39,17 @@ func InitEnv() (*Env, zerolog.Logger) {
 	viper.AutomaticEnv()
 	err = viper.Unmarshal(&env)
 	if err != nil {
-		log.Info().Msg("Error unmarshalling .env file")
+		log.Info().Msg("Error unmarshalling env")
 	}
 
 	if env.AppEnv == "DEV" {
 		log.Info().Msgf("DEV mode:%s", env.AppPort)
 	}
+
+	log.Info().Msgf("AppEnv:%t", viper.IsSet("APP_ENV"))
+	log.Info().Msgf("AppEnv:%t", viper.IsSet("APP_PORT"))
+	log.Info().Msgf("AppEnv:%t", viper.IsSet("VOUCHERIFY_ID"))
+	log.Info().Msgf("AppEnv:%t", viper.IsSet("VOUCHERIFY_SECRET_KEY"))
 
 	return &env, log
 }
