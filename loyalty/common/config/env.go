@@ -25,16 +25,21 @@ func InitEnv() (*Env, zerolog.Logger) {
 		Logger()
 
 	env := Env{}
-	viper.SetConfigFile(".env")
 
+	viper.SetConfigFile(".env")
 	err := viper.ReadInConfig()
 	if err != nil {
-		log.Error().Msg("Error reading .env file")
+		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
+			log.Info().Msg("The .env file not found")
+		} else {
+			log.Info().Msg("Error reading .env file")
+		}
 	}
 
+	viper.AutomaticEnv()
 	err = viper.Unmarshal(&env)
 	if err != nil {
-		log.Error().Msg("Error unmarshalling .env file")
+		log.Info().Msg("Error unmarshalling .env file")
 	}
 
 	if env.AppEnv == "DEV" {

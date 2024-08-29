@@ -5,12 +5,12 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-	//"github.com/tatangharyadi/integration/loyalty/common/config"
-	//"github.com/tatangharyadi/integration/loyalty/pkg/voucherify"
+	"github.com/tatangharyadi/integration/loyalty/common/config"
+	"github.com/tatangharyadi/integration/loyalty/pkg/voucherify"
 )
 
 func main() {
-	// env, log := config.InitEnv()
+	env, log := config.InitEnv()
 
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
@@ -18,12 +18,12 @@ func main() {
 		w.Write([]byte("Hello World!"))
 	})
 
-	// rs := voucherify.VoucherifyResource{
-	// 	Env: env,
-	// 	Log: log,
-	// }
-	// r.Mount("/voucherify", rs.Routes())
+	rs := voucherify.VoucherifyResource{
+		Env: env,
+		Log: log,
+	}
+	r.Mount("/voucherify", rs.Routes())
 
-	addr := ":8080" //+ env.AppPort
+	addr := ":" + env.AppPort
 	http.ListenAndServe(addr, r)
 }
