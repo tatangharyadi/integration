@@ -46,10 +46,11 @@ func InitEnv() (*Env, zerolog.Logger) {
 		log.Info().Msgf("DEV mode:%s", env.AppPort)
 	}
 
-	log.Info().Msgf("AppEnv:%t", viper.IsSet("APP_ENV"))
-	log.Info().Msgf("AppEnv:%t", viper.IsSet("APP_PORT"))
-	log.Info().Msgf("AppEnv:%t", viper.IsSet("VOUCHERIFY_ID"))
-	log.Info().Msgf("AppEnv:%t", viper.IsSet("VOUCHERIFY_SECRET_KEY"))
+	log.Info().Msgf("AppEnv:%s", env.AppEnv)
+	log.Info().Msgf("AppPort:%s", env.AppPort)
+
+	log.Info().Msgf("VoucherifyId:%t", env.VoucherifyId)
+	log.Info().Msgf("VoucherifySecretKey:%t", viper.IsSet("VOUCHERIFY_SECRET_KEY"))
 
 	return &env, log
 }
