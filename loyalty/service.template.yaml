@@ -17,9 +17,15 @@ spec:
         - name: APP_PORT
           value: '8080'
         - name: VOUCHERIFY_ID
-          value: ${TOKEN01}
+          valueFrom:
+            secretKeyRef:
+              key: latest
+              name: voucherify-id
         - name: VOUCHERIFY_SECRET_KEY
-          value: ${TOKEN02}
+          valueFrom:
+            secretKeyRef:
+              key: latest
+              name: voucherify-secret-key
   traffic:
   - percent: 100
     latestRevision: true
