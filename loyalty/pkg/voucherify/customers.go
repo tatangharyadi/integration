@@ -7,7 +7,7 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/tatangharyadi/integration/loyalty/dto"
+	"github.com/tatangharyadi/integration/loyalty/model"
 )
 
 type VoucherifyMetadata struct {
@@ -25,12 +25,12 @@ type VoucherifyCustomer struct {
 	Metadata VoucherifyMetadata `json:"metadata"`
 }
 
-func MapCustomer(customer VoucherifyCustomer) dto.Customer {
-	return dto.Customer{
+func MapCustomer(customer VoucherifyCustomer) model.Customer {
+	return model.Customer{
 		CustomerId: customer.SourceId,
 		Name:       customer.Name,
 		Phone:      customer.Phone,
-		Credit: dto.Credit{
+		Credit: model.Credit{
 			LastTransactionDate: customer.Metadata.EmployeeRedemptionDate,
 			Period:              customer.Metadata.EmployeeRedemptionPeriod,
 			Limit:               customer.Metadata.EmployeeRedemptionMaxPeriod,

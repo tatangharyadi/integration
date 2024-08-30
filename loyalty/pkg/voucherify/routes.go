@@ -7,8 +7,8 @@ import (
 )
 
 type VoucherifyResource struct {
-	Env *config.Env
-	Log zerolog.Logger
+	Env    *config.Env
+	Logger zerolog.Logger
 }
 
 func (rs VoucherifyResource) Routes() chi.Router {

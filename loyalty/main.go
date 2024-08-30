@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	env, log := config.InitEnv()
+	env, logger := config.InitEnv()
 
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
@@ -19,11 +19,12 @@ func main() {
 	})
 
 	rs := voucherify.VoucherifyResource{
-		Env: env,
-		Log: log,
+		Env:    env,
+		Logger: logger,
 	}
 	r.Mount("/voucherify", rs.Routes())
 
+	logger.Info().Msgf("Listening %s mode:%s", env.AppEnv, env.AppPort)
 	addr := ":" + env.AppPort
 	http.ListenAndServe(addr, r)
 }
