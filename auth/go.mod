@@ -5,7 +5,6 @@ go 1.23.0
 require github.com/rs/zerolog v1.33.0
 
 require (
-	github.com/ajg/form v1.5.1 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
@@ -28,7 +27,6 @@ require (
 
 require (
 	github.com/go-chi/chi/v5 v5.1.0
-	github.com/go-chi/render v1.0.3
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.19 // indirect
 	github.com/spf13/viper v1.19.0
