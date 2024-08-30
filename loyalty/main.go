@@ -12,11 +12,6 @@ import (
 func main() {
 	env, log := config.InitEnv()
 
-	log.Info().Msgf("AppEnv:%s", env.AppEnv)
-	log.Info().Msgf("AppPort:%s", env.AppPort)
-
-	log.Info().Msgf("VoucherifyId:%s", env.VoucherifyId)
-
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {

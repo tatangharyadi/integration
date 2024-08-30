@@ -25,6 +25,10 @@ func InitEnv() (*Env, zerolog.Logger) {
 		Logger()
 
 	env := Env{}
+	viper.BindEnv("APP_ENV")
+	viper.BindEnv("APP_PORT")
+	viper.BindEnv("VOUCHERIFY_ID")
+	viper.BindEnv("VOUCHERIFY_SECRET_KEY")
 
 	viper.SetConfigFile(".env")
 	err := viper.ReadInConfig()
