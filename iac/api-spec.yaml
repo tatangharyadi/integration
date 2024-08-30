@@ -10,20 +10,39 @@ schemes:
   - "https"
 security: []
 tags:
-  - name: "hello"
-    description: "Hello World"
   - name: "auth"
     description: "Auth"
+  - name: "auth0"
+    description: "Auth0"
   - name: "loyalty"
     description: "Loyalty"
   - name: "voucherify"
     description: "Voucherify"
 
 paths:
+  /hello/auth:
+    get:
+      tags:
+        - "auth"
+      summary: "Hello World"
+      operationId: "helloAuth"
+      x-google-backend:
+        address: https://integration-auth-238488984298.asia-southeast2.run.app
+        path_translation: CONSTANT_ADDRESS
+      security:
+        - api_key: []
+      produces:
+        - "application/json"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            type: "string"
+            example: "Hello, World!"
   /hello/loyalty:
     get:
       tags:
-        - "hello"
+        - "loyalty"
       summary: "Hello World"
       operationId: "helloLoyalty"
       x-google-backend:
@@ -40,14 +59,14 @@ paths:
             type: "string"
             example: "Hello, World!"
 
-  /oauth/token:
+  /auth0/gettoken:
     post:
       tags:
-        - "auth"
+        - "auth0"
       summary: "generate a token"
       operationId: "generateToken"
       x-google-backend:
-        address: https://auth-service-sqhjv6cojq-et.a.run.app/
+        address: https://integration-auth-238488984298.asia-southeast2.run.app
         path_translation: APPEND_PATH_TO_ADDRESS
       consumes:
         - "application/json"
