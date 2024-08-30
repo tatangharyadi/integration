@@ -18,6 +18,7 @@ type Env struct {
 var logger zerolog.Logger
 
 func InitEnv() (*Env, zerolog.Logger) {
+	zerolog.LevelFieldName = "severity"
 	logger = zerolog.New(os.Stderr).Level(zerolog.InfoLevel)
 
 	env := Env{}
