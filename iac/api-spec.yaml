@@ -3,8 +3,8 @@ swagger: "2.0"
 info:
   title: "integration - OpenAPI"
   description:
-    "This is the OpenAPI specification for [integration] (https://github.com/tatangharyadi/integration).\
-    \ You will need the `apiKey` for authorization"
+    "This is the OpenAPI specification for tatangharyadi/integration (https://github.com/tatangharyadi/integration).\
+    \ An `apiKey` will be needed for authorization"
   version: "1.0.0"
 schemes:
   - "https"
@@ -40,6 +40,34 @@ paths:
             type: "string"
             example: "Hello, World!"
 
+  /oauth/token:
+    post:
+      tags:
+        - "auth"
+      summary: "generate a token"
+      operationId: "generateToken"
+      x-google-backend:
+        address: https://auth-service-sqhjv6cojq-et.a.run.app/
+        path_translation: APPEND_PATH_TO_ADDRESS
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "body"
+          in: "body"
+          description: "Client object"
+          required: true
+          schema:
+            $ref: "#/definitions/Client"
+      responses:
+        201:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/Token"
+        401:
+          description: "Unauthorized"
+
   /voucherify/getcustomer/{customerId}:
     get:
       tags:
@@ -72,8 +100,49 @@ securityDefinitions:
     type: "apiKey"
     name: "key"
     in: "query"
+  oauth2:
+    authorizationUrl: "https://yummycorp.jp.auth0.com/"
+    flow: "implicit"
+    type: "oauth2"
+    x-google-issuer: "https://yummycorp.jp.auth0.com/"
+    x-google-jwks_uri: "https://yummycorp.jp.auth0.com/.well-known/jwks.json"
+    x-google-audiences: "https://yummyos.yummycorp.com/"
 
 definitions:
+
+  Client:
+    type: "object"
+    required:
+      - "client_id"
+      - "client_secret"
+    properties:
+      client_id:
+        type: "string"
+      client_secret:
+        type: "string"
+      audience:
+        type: "string"
+        example: "pos-api"
+      grant_type:
+        type: "string"
+        example: "client_credentials"
+  Token:
+    type: "object"
+    required:
+      - "access_token"
+    properties:
+      access_token:
+        type: "string"
+      scope:
+        type: "string"
+        example: "read:customer"
+      expires_in:
+        type: "integer"
+        format: "int32"
+      token_type:
+        type: "string"
+        example: "Bearer"
+
   Customer:
     type: "object"
     required:

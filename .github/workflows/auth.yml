@@ -5,16 +5,16 @@
         branches:
             - main
         paths:
-            - 'loyalty/**'
+            - 'auth/**'
       workflow_dispatch:
     
     env:
-      CONTEXT: './loyalty'
-      SERVICE_TEMPLATE: './loyalty/service.template.yaml'
+      CONTEXT: './auth'
+      SERVICE_TEMPLATE: './auth/service.template.yaml'
       PROJECT_ID: ${{ vars.PROJECT_ID }}
       GAR_LOCATION: ${{ vars.GAR_LOCATION }}
       REPOSITORY: ${{ vars.REPOSITORY }}
-      SERVICE: ${{ vars.SERVICE }}
+      SERVICE: ${{ vars.AUTH_SERVICE }}
       REGION: ${{ vars.REGION }}
     
     jobs:
@@ -23,7 +23,7 @@
         strategy:
           matrix:
             include:
-              - dockerfile: 'loyalty/Dockerfile'
+              - dockerfile: 'auth/Dockerfile'
 
         steps:
         - name: Checkout
