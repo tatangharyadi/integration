@@ -1,0 +1,107 @@
+---
+swagger: "2.0"
+info:
+  title: "integration - OpenAPI"
+  description:
+    "This is the OpenAPI specification for [integration] (https://github.com/tatangharyadi/integration).\
+    \ You will need the `apiKey` for authorization"
+  version: "1.0.0"
+schemes:
+  - "https"
+security: []
+tags:
+  - name: "hello"
+    description: "Hello World"
+  - name: "auth"
+    description: "Auth"
+  - name: "loyalty"
+    description: "Loyalty"
+  - name: "voucherify"
+    description: "Voucherify"
+
+paths:
+  /hello/loyalty:
+    get:
+      tags:
+        - "hello"
+      summary: "Hello World"
+      operationId: "helloLoyalty"
+      x-google-backend:
+        address: https://integration-loyalty-238488984298.asia-southeast2.run.app
+        path_translation: CONSTANT_ADDRESS
+      security:
+        - api_key: []
+      produces:
+        - "application/json"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            type: "string"
+            example: "Hello, World!"
+
+  /voucherify/getcustomer/{customerId}:
+    get:
+      tags:
+        - "voucherify"
+      summary: "Get a customer"
+      operationId: "getCustomer"
+      x-google-backend:
+        address: https://integration-loyalty-238488984298.asia-southeast2.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+      security:
+        - api_key: []
+      produces:
+        - "application/json"
+      parameters:
+        - name: "customerId"
+          in: "path"
+          description: "Id of customer to return"
+          required: true
+          type: "string"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/Customer"
+        404:
+          description: "Customer not found"
+
+securityDefinitions:
+  api_key:
+    type: "apiKey"
+    name: "key"
+    in: "query"
+
+definitions:
+  Customer:
+    type: "object"
+    required:
+      - "customer_id"
+    properties:
+      customer_id:
+        type: "string"
+        example: "customer id"
+      name:
+        type: "string"
+        example: "name"
+      phone:
+        type: "string"
+        example: "phone"
+      credit:
+        $ref: "#/definitions/Credit"
+  Credit:
+    type: "object"
+    properties:
+      last_transaction_date:
+        type: "string"
+        format: "date-time"
+      period:
+        type: "string"
+        example: "period"
+      limit:
+        type: "number"
+        format: "float"
+      current_total:
+        type: "number"
+        format: "float"
