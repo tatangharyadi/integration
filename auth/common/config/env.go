@@ -9,8 +9,9 @@ import (
 )
 
 type Env struct {
-	AppEnv  string `mapstructure:"APP_ENV"`
-	AppPort string `mapstructure:"APP_PORT"`
+	AppEnv   string `mapstructure:"APP_ENV"`
+	AppPort  string `mapstructure:"APP_PORT"`
+	OAuthURL string `mapstructure:"OAUTH_URL"`
 }
 
 var logger zerolog.Logger
@@ -22,6 +23,7 @@ func InitEnv() (*Env, zerolog.Logger) {
 	env := Env{}
 	viper.BindEnv("APP_ENV")
 	viper.BindEnv("APP_PORT")
+	viper.BindEnv("OAUTH_URL")
 
 	viper.SetConfigFile(".env")
 	err := viper.ReadInConfig()

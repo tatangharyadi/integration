@@ -16,6 +16,8 @@ spec:
           value: 'PROD'
         - name: APP_PORT
           value: '8080'
+        - name: OAUTH_URL
+          value: 'https://yummycorp.jp.auth0.com/oauth/token'
   traffic:
   - percent: 100
     latestRevision: true
