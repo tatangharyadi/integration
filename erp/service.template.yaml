@@ -1,0 +1,36 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: ${SERVICE}
+spec:
+  template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/maxScale: '5'
+    spec:
+      containerConcurrency: 80
+      containers:
+      - image: ${IMAGE}
+        env:
+        - name: APP_ENV
+          value: 'PROD'
+        - name: APP_PORT
+          value: '8080'
+        - name: ODOO_USER
+          valueFrom:
+            secretKeyRef:
+              key: latest
+              name: odoo-user
+        - name: ODOO_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: latest
+              name: odoo-password
+        - name: ODOO_DB
+          valueFrom:
+            secretKeyRef:
+              key: latest
+              name: odoo-db
+  traffic:
+  - percent: 100
+    latestRevision: true
