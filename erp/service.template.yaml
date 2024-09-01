@@ -16,6 +16,8 @@ spec:
           value: 'PROD'
         - name: APP_PORT
           value: '8080'
+        - name: ERP_URL
+          value: 'https://erp-yummycorp.odoo.com'
         - name: ODOO_USER
           valueFrom:
             secretKeyRef:

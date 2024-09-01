@@ -3,11 +3,11 @@ package odoo
 import (
 	"github.com/go-chi/chi/v5"
 	"github.com/rs/zerolog"
-	"github.com/tatangharyadi/integration/erp/common/config"
+	"github.com/tatangharyadi/integration/erp/common/configs"
 )
 
 type Handler struct {
-	Env    *config.Env
+	Env    *configs.Env
 	Logger zerolog.Logger
 }
 

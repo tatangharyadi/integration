@@ -5,12 +5,12 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-	"github.com/tatangharyadi/integration/erp/common/config"
-	odoo "github.com/tatangharyadi/integration/erp/pkg"
+	"github.com/tatangharyadi/integration/erp/common/configs"
+	"github.com/tatangharyadi/integration/erp/pkg/odoo"
 )
 
 func main() {
-	env, logger := config.InitEnv()
+	env, logger := configs.InitEnv()
 
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
