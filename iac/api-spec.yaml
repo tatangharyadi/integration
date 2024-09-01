@@ -22,6 +22,8 @@ tags:
     description: "Loyalty"
   - name: "voucherify"
     description: "Voucherify"
+  - name: "payment"
+    description: "Payment"
 
 paths:
   /hello/auth:
@@ -70,6 +72,25 @@ paths:
       operationId: "helloLoyalty"
       x-google-backend:
         address: https://integration-loyalty-238488984298.asia-southeast2.run.app
+        path_translation: CONSTANT_ADDRESS
+      security:
+        - api_key: []
+      produces:
+        - "application/json"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            type: "string"
+            example: "Hello, World!"
+  /hello/payment:
+    get:
+      tags:
+        - "payment"
+      summary: "Hello World"
+      operationId: "helloPayment"
+      x-google-backend:
+        address: https://integration-payment-238488984298.asia-southeast2.run.app
         path_translation: CONSTANT_ADDRESS
       security:
         - api_key: []
