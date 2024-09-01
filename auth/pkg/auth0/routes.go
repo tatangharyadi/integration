@@ -3,17 +3,17 @@ package auth0
 import (
 	"github.com/go-chi/chi/v5"
 	"github.com/rs/zerolog"
-	"github.com/tatangharyadi/integration/auth/common/config"
+	config "github.com/tatangharyadi/integration/auth/common/configs"
 )
 
-type Auth0Resource struct {
+type Handler struct {
 	Env    *config.Env
 	Logger zerolog.Logger
 }
 
-func (rs Auth0Resource) Routes() chi.Router {
+func (h Handler) Routes() chi.Router {
 	r := chi.NewRouter()
 
-	r.Post("/gettoken", rs.GetToken)
+	r.Post("/gettoken", h.GetToken)
 	return r
 }

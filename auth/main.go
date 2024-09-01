@@ -5,7 +5,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-	"github.com/tatangharyadi/integration/auth/common/config"
+	config "github.com/tatangharyadi/integration/auth/common/configs"
 	"github.com/tatangharyadi/integration/auth/pkg/auth0"
 )
 
@@ -15,14 +15,14 @@ func main() {
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("Hello World from auth"))
+		w.Write([]byte("Hello World from integration-auth"))
 	})
 
-	rs := auth0.Auth0Resource{
+	h := auth0.Handler{
 		Env:    env,
 		Logger: logger,
 	}
-	r.Mount("/auth0", rs.Routes())
+	r.Mount("/auth0", h.Routes())
 
 	logger.Info().Msgf("Listening %s mode:%s", env.AppEnv, env.AppPort)
 	addr := ":" + env.AppPort

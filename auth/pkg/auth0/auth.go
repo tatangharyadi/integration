@@ -9,7 +9,7 @@ import (
 	"github.com/tatangharyadi/integration/auth/model"
 )
 
-func (rs Auth0Resource) GetToken(w http.ResponseWriter, r *http.Request) {
+func (h Handler) GetToken(w http.ResponseWriter, r *http.Request) {
 	var credential model.Credential
 	err := json.NewDecoder(r.Body).Decode(&credential)
 	if err != nil {
@@ -23,7 +23,7 @@ func (rs Auth0Resource) GetToken(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	url := rs.Env.OAuthURL
+	url := h.Env.OAuthURL
 	client := &http.Client{}
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(payload))
 	if err != nil {
