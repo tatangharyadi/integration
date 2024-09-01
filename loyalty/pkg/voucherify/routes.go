@@ -3,17 +3,17 @@ package voucherify
 import (
 	"github.com/go-chi/chi/v5"
 	"github.com/rs/zerolog"
-	"github.com/tatangharyadi/integration/loyalty/common/config"
+	"github.com/tatangharyadi/integration/loyalty/common/configs"
 )
 
-type VoucherifyResource struct {
-	Env    *config.Env
+type Handler struct {
+	Env    *configs.Env
 	Logger zerolog.Logger
 }
 
-func (rs VoucherifyResource) Routes() chi.Router {
+func (h Handler) Routes() chi.Router {
 	r := chi.NewRouter()
 
-	r.Get("/getcustomer/{customerId}", rs.GetCustomer)
+	r.Get("/getcustomer/{customerId}", h.GetCustomer)
 	return r
 }

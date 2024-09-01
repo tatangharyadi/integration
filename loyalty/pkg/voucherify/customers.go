@@ -7,7 +7,7 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/tatangharyadi/integration/loyalty/model"
+	"github.com/tatangharyadi/integration/loyalty/models"
 )
 
 type VoucherifyMetadata struct {
@@ -25,12 +25,12 @@ type VoucherifyCustomer struct {
 	Metadata VoucherifyMetadata `json:"metadata"`
 }
 
-func MapCustomer(customer VoucherifyCustomer) model.Customer {
-	return model.Customer{
+func MapCustomer(customer VoucherifyCustomer) models.Customer {
+	return models.Customer{
 		CustomerId: customer.SourceId,
 		Name:       customer.Name,
 		Phone:      customer.Phone,
-		Credit: model.Credit{
+		Credit: models.Credit{
 			LastTransactionDate: customer.Metadata.EmployeeRedemptionDate,
 			Period:              customer.Metadata.EmployeeRedemptionPeriod,
 			Limit:               customer.Metadata.EmployeeRedemptionMaxPeriod,
@@ -39,7 +39,7 @@ func MapCustomer(customer VoucherifyCustomer) model.Customer {
 	}
 }
 
-func (rs VoucherifyResource) GetCustomer(w http.ResponseWriter, r *http.Request) {
+func (h Handler) GetCustomer(w http.ResponseWriter, r *http.Request) {
 	customerId := chi.URLParam(r, "customerId")
 	url := fmt.Sprintf("https://as1.api.voucherify.io/v1/customers/%s", customerId)
 	client := &http.Client{}
@@ -49,8 +49,8 @@ func (rs VoucherifyResource) GetCustomer(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	req.Header.Set("X-App-Id", rs.Env.VoucherifyId)
-	req.Header.Set("X-App-Token", rs.Env.VoucherifySecretKey)
+	req.Header.Set("X-App-Id", h.Env.VoucherifyId)
+	req.Header.Set("X-App-Token", h.Env.VoucherifySecretKey)
 
 	resp, err := client.Do(req)
 	if err != nil {

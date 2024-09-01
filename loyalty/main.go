@@ -5,7 +5,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-	"github.com/tatangharyadi/integration/loyalty/common/config"
+	config "github.com/tatangharyadi/integration/loyalty/common/configs"
 	"github.com/tatangharyadi/integration/loyalty/pkg/voucherify"
 )
 
@@ -18,11 +18,11 @@ func main() {
 		w.Write([]byte("Hello World from loyalty"))
 	})
 
-	rs := voucherify.VoucherifyResource{
+	h := voucherify.Handler{
 		Env:    env,
 		Logger: logger,
 	}
-	r.Mount("/voucherify", rs.Routes())
+	r.Mount("/voucherify", h.Routes())
 
 	logger.Info().Msgf("Listening %s mode:%s", env.AppEnv, env.AppPort)
 	addr := ":" + env.AppPort

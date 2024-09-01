@@ -1,4 +1,4 @@
-package model
+package models
 
 type Credit struct {
 	LastTransactionDate string `json:"last_transaction_date"`
