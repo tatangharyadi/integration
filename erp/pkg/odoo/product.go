@@ -31,7 +31,7 @@ func (h Handler) GetProduct(w http.ResponseWriter, r *http.Request) {
 		[]any{"write_date", ">=", paramGetProduct.FromDate},
 		[]any{"write_date", "<=", paramGetProduct.ToDate},
 	}
-	if id != "*" {
+	if id != "*" && id != ":id" {
 		domainFilter = append(domainFilter, []any{"id", "=", id})
 	}
 
