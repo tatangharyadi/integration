@@ -1,0 +1,23 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: ${SERVICE}
+spec:
+  template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/maxScale: '5'
+    spec:
+      containerConcurrency: 80
+      containers:
+      - image: ${IMAGE}
+        env:
+        - name: APP_ENV
+          value: 'PROD'
+        - name: APP_PORT
+          value: '8080'
+        - name: PAYMENT_URL
+          value: 'https://api.xendit.co'
+  traffic:
+  - percent: 100
+    latestRevision: true
