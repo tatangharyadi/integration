@@ -14,6 +14,6 @@ type Handler struct {
 func (h Handler) Routes() chi.Router {
 	r := chi.NewRouter()
 
-	r.Get("/getproduct/{id}", h.GetProduct)
+	r.Post("/getproduct/{id}", h.GetProduct)
 	return r
 }

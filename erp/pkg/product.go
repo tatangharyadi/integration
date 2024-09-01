@@ -10,16 +10,26 @@ import (
 	"github.com/kolo/xmlrpc"
 )
 
+type paramGetProduct struct {
+	FromDate string `json:"fromDate"`
+	ToDate   string `json:"toDate"`
+}
+
 func (h Handler) GetProduct(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
-	fromDate := r.URL.Query().Get("fromDate")
-	toDate := r.URL.Query().Get("toDate")
+
+	var paramGetProduct paramGetProduct
+	err := json.NewDecoder(r.Body).Decode(&paramGetProduct)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
 
 	domainFilter := []any{
 		[]any{"active", "=", true},
 		[]any{"sale_ok", "=", true},
-		[]any{"write_date", ">=", fromDate},
-		[]any{"write_date", "<=", toDate},
+		[]any{"write_date", ">=", paramGetProduct.FromDate},
+		[]any{"write_date", "<=", paramGetProduct.ToDate},
 	}
 	if id != "*" {
 		domainFilter = append(domainFilter, []any{"id", "=", id})
@@ -56,6 +66,7 @@ func (h Handler) GetProduct(w http.ResponseWriter, r *http.Request) {
 				"description_sale",
 				"standard_price",
 				"list_price",
+				"write_date",
 			},
 			"limit": 5,
 		},
