@@ -6,11 +6,11 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/tatangharyadi/integration/auth/model"
+	"github.com/tatangharyadi/integration/auth/models"
 )
 
 func (h Handler) GetToken(w http.ResponseWriter, r *http.Request) {
-	var credential model.Credential
+	var credential models.Credential
 	err := json.NewDecoder(r.Body).Decode(&credential)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)

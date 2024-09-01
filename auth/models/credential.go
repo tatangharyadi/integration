@@ -1,4 +1,4 @@
-package model
+package models
 
 type Credential struct {
 	ClientID     string `json:"client_id"`

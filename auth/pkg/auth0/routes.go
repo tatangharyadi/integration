@@ -3,11 +3,11 @@ package auth0
 import (
 	"github.com/go-chi/chi/v5"
 	"github.com/rs/zerolog"
-	config "github.com/tatangharyadi/integration/auth/common/configs"
+	"github.com/tatangharyadi/integration/auth/common/configs"
 )
 
 type Handler struct {
-	Env    *config.Env
+	Env    *configs.Env
 	Logger zerolog.Logger
 }
 
