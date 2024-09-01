@@ -5,12 +5,12 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-	config "github.com/tatangharyadi/integration/loyalty/common/configs"
+	"github.com/tatangharyadi/integration/loyalty/common/configs"
 	"github.com/tatangharyadi/integration/loyalty/pkg/voucherify"
 )
 
 func main() {
-	env, logger := config.InitEnv()
+	env, logger := configs.InitEnv()
 
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
