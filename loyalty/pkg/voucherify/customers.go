@@ -10,18 +10,23 @@ import (
 	"github.com/tatangharyadi/integration/loyalty/models"
 )
 
+type VoucherifyCredit struct {
+	Cycle               string  `json:"cycle"`
+	Limit               float64 `json:"limit"`
+	Balance             float64 `json:"balance"`
+	LastTransactionDate string  `json:"last_transaction_date"`
+}
+
 type VoucherifyMetadata struct {
-	CardGuid                      string `json:"card_guiid"`
-	EmployeeRedemptionDate        string `json:"employee_redemption_date"`
-	EmployeeRedemptionPeriod      string `json:"employee_redemption_period"`
-	EmployeeRedemptionMaxPeriod   int    `json:"employee_redemption_max_period"`
-	EmployeeRedemptionTotalPeriod int    `json:"employee_redemption_total_period"`
+	CompanyBenefit VoucherifyCredit `json:"company_benefit"`
+	PersonalCredit VoucherifyCredit `json:"personal_credit"`
 }
 
 type VoucherifyCustomer struct {
 	SourceId string             `json:"source_id"`
 	Name     string             `json:"name"`
-	Phone    string             `json:"phone_number"`
+	Email    string             `json:"email"`
+	Phone    string             `json:"phone"`
 	Metadata VoucherifyMetadata `json:"metadata"`
 }
 
@@ -29,19 +34,26 @@ func MapCustomer(customer VoucherifyCustomer) models.Customer {
 	return models.Customer{
 		CustomerId: customer.SourceId,
 		Name:       customer.Name,
+		Email:      customer.Email,
 		Phone:      customer.Phone,
-		Credit: models.Credit{
-			LastTransactionDate: customer.Metadata.EmployeeRedemptionDate,
-			Period:              customer.Metadata.EmployeeRedemptionPeriod,
-			Limit:               customer.Metadata.EmployeeRedemptionMaxPeriod,
-			CurrentTotal:        customer.Metadata.EmployeeRedemptionTotalPeriod,
+		CompanyBenefit: models.Credit{
+			Cycle:               customer.Metadata.CompanyBenefit.Cycle,
+			Limit:               customer.Metadata.CompanyBenefit.Limit,
+			Balance:             customer.Metadata.CompanyBenefit.Balance,
+			LastTransactionDate: customer.Metadata.CompanyBenefit.LastTransactionDate,
+		},
+		PersonalCredit: models.Credit{
+			Cycle:               customer.Metadata.PersonalCredit.Cycle,
+			Limit:               customer.Metadata.PersonalCredit.Limit,
+			Balance:             customer.Metadata.PersonalCredit.Balance,
+			LastTransactionDate: customer.Metadata.PersonalCredit.LastTransactionDate,
 		},
 	}
 }
 
 func (h Handler) GetCustomer(w http.ResponseWriter, r *http.Request) {
 	customerId := chi.URLParam(r, "customerId")
-	url := fmt.Sprintf("https://as1.api.voucherify.io/v1/customers/%s", customerId)
+	url := fmt.Sprintf("%s/customers/%s", h.Env.LoyaltyUrl, customerId)
 	client := &http.Client{}
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {

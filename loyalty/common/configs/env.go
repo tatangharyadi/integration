@@ -11,6 +11,7 @@ import (
 type Env struct {
 	AppEnv              string `mapstructure:"APP_ENV"`
 	AppPort             string `mapstructure:"APP_PORT"`
+	LoyaltyUrl          string `mapstructure:"LOYALTY_URL"`
 	VoucherifyId        string `mapstructure:"VOUCHERIFY_ID"`
 	VoucherifySecretKey string `mapstructure:"VOUCHERIFY_SECRET_KEY"`
 }
@@ -24,6 +25,7 @@ func InitEnv() (*Env, zerolog.Logger) {
 	env := Env{}
 	viper.BindEnv("APP_ENV")
 	viper.BindEnv("APP_PORT")
+	viper.BindEnv("LOYALTY_URL")
 	viper.BindEnv("VOUCHERIFY_ID")
 	viper.BindEnv("VOUCHERIFY_SECRET_KEY")
 

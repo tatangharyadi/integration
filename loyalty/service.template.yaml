@@ -16,6 +16,8 @@ spec:
           value: 'PROD'
         - name: APP_PORT
           value: '8080'
+        - name: LOYALTY_URL
+          value: 'https://as1.api.voucherify.io/v1'
         - name: VOUCHERIFY_ID
           valueFrom:
             secretKeyRef:
