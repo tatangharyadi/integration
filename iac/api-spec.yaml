@@ -131,11 +131,41 @@ paths:
         401:
           description: "Unauthorized"
           
-  /odoo/getproduct/{id}:
+          
+  /odoo/getproductids:
     post:
       tags:
         - "odoo"
-      summary: "Get one or more product"
+      summary: "Get one or more product IDs"
+      operationId: "getProductId"
+      x-google-backend:
+        address: https://integration-erp-238488984298.asia-southeast2.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+      security:
+        - api_key: []
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "body"
+          in: "body"
+          description: "Date range object"
+          required: true
+          schema:
+            $ref: "#/definitions/DateRange"
+      responses:
+        201:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/ProductId"
+        404:
+          description: "Product IDs not found"
+  /odoo/getproduct/{id}:
+    get:
+      tags:
+        - "odoo"
+      summary: "Get a product"
       operationId: "getProduct"
       x-google-backend:
         address: https://integration-erp-238488984298.asia-southeast2.run.app
@@ -149,15 +179,9 @@ paths:
       parameters:
         - name: "id"
           in: "path"
-          description: "id of product to return or * for all"
+          description: "ID of product to return"
           required: true
           type: "string"
-        - name: "body"
-          in: "body"
-          description: "Date range object"
-          required: true
-          schema:
-            $ref: "#/definitions/DateRange"
       responses:
         201:
           description: "successful operation"
@@ -166,7 +190,7 @@ paths:
         404:
           description: "Product not found"
 
-  /voucherify/getcustomer/{customerId}:
+  /voucherify/getcustomer/{id}:
     get:
       tags:
         - "voucherify"
@@ -180,7 +204,7 @@ paths:
       produces:
         - "application/json"
       parameters:
-        - name: "customerId"
+        - name: "id"
           in: "path"
           description: "Id of customer to return"
           required: true
@@ -253,7 +277,18 @@ definitions:
       toDate:
         type: "string"
         format: "date-time"
-
+        
+  ProductId:
+    type: "object"
+    required:
+    - "id"
+    properties:
+      id:
+        type: "integer"
+        format: "int64"
+      update_timestamp:
+        type: "string"
+        format: "date-time"
   Product:
     type: "object"
     required:
@@ -263,54 +298,79 @@ definitions:
         type: "integer"
         format: "int64"
         example: 14236,
-      name:
+      sku:
         type: "string"
-        example: "Agar-Agar Serbuk White, Swallow Globe, 12 pcs"
+        example: "BAKE00008351"
       barcode:
         type: "string"
         example: "BAKE00008351"
-      description:
-        type: "boolean"
-      description_sale:
-        type: "boolean"
-      list_price:
-        type: "number"
-        format: "float"
-      standard_price":
-        type: "number"
-        format: "float"
-      write_date:
+      name:
         type: "string"
-        format: "date-time"
+        example: "Agar-Agar Serbuk White, Swallow Globe, 12 pcs"
+      description:
+        type: "string"
+      cost:
+        type: "number"
+        format: "float"
+      price:
+        type: "number"
+        format: "float"
+      parent:
+        $ref: "#/definitions/ParentProduct"
+  ParentProduct:
+    type: "object"
+    required:
+      - "id"
+    properties:
+      id:
+        type: "integer"
+        format: "int64"
+        example: 14236,
+      sku:
+        type: "string"
+        example: "BAKE00008351"
+      name:
+        type: "string"
+        example: "Agar-Agar Serbuk White, Swallow Globe, 12 pcs"
+      description:
+        type: "string"
+      cost:
+        type: "number"
+        format: "float"
 
   Customer:
     type: "object"
     required:
-      - "customer_id"
+      - "id"
     properties:
-      customer_id:
+      id:
         type: "string"
-        example: "customer id"
+        example: "GPAS-123"
       name:
         type: "string"
         example: "name"
+      email:
+        type: "string"
+        example: "email@email.com"  
       phone:
         type: "string"
-        example: "phone"
-      credit:
+        example: "+62123"
+      company_benefit:
+        $ref: "#/definitions/Credit"
+      personal_credit:
         $ref: "#/definitions/Credit"
   Credit:
     type: "object"
     properties:
-      last_transaction_date:
+      cycle:
         type: "string"
-        format: "date-time"
-      period:
-        type: "string"
-        example: "period"
+        example: "DD"
       limit:
         type: "number"
         format: "float"
-      current_total:
+      balance:
         type: "number"
         format: "float"
+      transaction_timestamp:
+        type: "string"
+        format: "date-time"
