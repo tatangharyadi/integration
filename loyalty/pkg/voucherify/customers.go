@@ -32,21 +32,21 @@ type VoucherifyCustomer struct {
 
 func MapCustomer(customer VoucherifyCustomer) models.Customer {
 	return models.Customer{
-		CustomerId: customer.SourceId,
-		Name:       customer.Name,
-		Email:      customer.Email,
-		Phone:      customer.Phone,
+		Id:    customer.SourceId,
+		Name:  customer.Name,
+		Email: customer.Email,
+		Phone: customer.Phone,
 		CompanyBenefit: models.Credit{
-			Cycle:               customer.Metadata.CompanyBenefit.Cycle,
-			Limit:               customer.Metadata.CompanyBenefit.Limit,
-			Balance:             customer.Metadata.CompanyBenefit.Balance,
-			LastTransactionDate: customer.Metadata.CompanyBenefit.LastTransactionDate,
+			Cycle:                customer.Metadata.CompanyBenefit.Cycle,
+			Limit:                customer.Metadata.CompanyBenefit.Limit,
+			Balance:              customer.Metadata.CompanyBenefit.Balance,
+			TransactionTimestamp: customer.Metadata.CompanyBenefit.LastTransactionDate,
 		},
 		PersonalCredit: models.Credit{
-			Cycle:               customer.Metadata.PersonalCredit.Cycle,
-			Limit:               customer.Metadata.PersonalCredit.Limit,
-			Balance:             customer.Metadata.PersonalCredit.Balance,
-			LastTransactionDate: customer.Metadata.PersonalCredit.LastTransactionDate,
+			Cycle:                customer.Metadata.PersonalCredit.Cycle,
+			Limit:                customer.Metadata.PersonalCredit.Limit,
+			Balance:              customer.Metadata.PersonalCredit.Balance,
+			TransactionTimestamp: customer.Metadata.PersonalCredit.LastTransactionDate,
 		},
 	}
 }
