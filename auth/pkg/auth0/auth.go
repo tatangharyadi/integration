@@ -23,7 +23,7 @@ func (h Handler) GetToken(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	url := h.Env.OAuthURL
+	url := h.Env.OAuthUrl
 	client := &http.Client{}
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(payload))
 	if err != nil {

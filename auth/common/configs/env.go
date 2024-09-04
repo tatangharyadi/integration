@@ -11,7 +11,7 @@ import (
 type Env struct {
 	AppEnv   string `mapstructure:"APP_ENV"`
 	AppPort  string `mapstructure:"APP_PORT"`
-	OAuthURL string `mapstructure:"OAUTH_URL"`
+	OAuthUrl string `mapstructure:"OAUTH_URL"`
 }
 
 var logger zerolog.Logger
