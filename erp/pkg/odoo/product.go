@@ -17,6 +17,11 @@ type ParamGetProduct struct {
 	ToDate   string `json:"toDate"`
 }
 
+type OdooField struct {
+	name   string
+	isBool bool
+}
+
 type OdooProduct struct {
 	Id              int           `json:"id"`
 	Template        []interface{} `json:"product_tmpl_id"`
@@ -73,13 +78,6 @@ func (h Handler) GetProductIds(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	domainFilter := []any{
-		[]any{"active", "=", true},
-		[]any{"sale_ok", "=", true},
-		[]any{"write_date", ">=", paramGetProduct.FromDate},
-		[]any{"write_date", "<=", paramGetProduct.ToDate},
-	}
-
 	client, err := xmlrpc.NewClient(fmt.Sprintf("%s/xmlrpc/2/common", h.Env.ErpUrl), nil)
 	if err != nil {
 		log.Fatal(err)
@@ -97,30 +95,19 @@ func (h Handler) GetProductIds(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	var body []map[string]any
-	if err := models.Call("execute_kw", []any{
-		h.Env.OdooDb, uid, h.Env.OdooPassword,
-		"product.product", "search_read",
-		[]any{domainFilter},
-		map[string]any{
-			"fields": []string{
-				"id",
-				"write_date",
-			},
-		},
-	}, &body); err != nil {
-		log.Fatal(err)
-	}
 
-	for i, record := range body {
-		for key, value := range record {
-			if value == false {
-				delete(body[i], key)
-			}
-		}
+	domain := map[string]OdooField{
+		"id":         {"id", false},
+		"write_date": {"write_date", false},
 	}
-
-	jsonData, err := json.Marshal(body)
+	domainFilter := []any{
+		[]any{"active", "=", true},
+		[]any{"sale_ok", "=", true},
+		[]any{"write_date", ">=", paramGetProduct.FromDate},
+		[]any{"write_date", "<=", paramGetProduct.ToDate},
+	}
+	domainFields := map[string]any{}
+	jsonData, err := ReadAll(h, uid, models, "product.product", "search_read", domain, domainFilter, domainFields)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -146,14 +133,6 @@ func (h Handler) GetProductIds(w http.ResponseWriter, r *http.Request) {
 func (h Handler) GetProduct(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 
-	domainFilter := []any{
-		[]any{"active", "=", true},
-		[]any{"sale_ok", "=", true},
-	}
-	if id != ":id" {
-		domainFilter = append(domainFilter, []any{"id", "=", id})
-	}
-
 	client, err := xmlrpc.NewClient(fmt.Sprintf("%s/xmlrpc/2/common", h.Env.ErpUrl), nil)
 	if err != nil {
 		log.Fatal(err)
@@ -171,38 +150,29 @@ func (h Handler) GetProduct(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	var body []map[string]any
-	if err := models.Call("execute_kw", []any{
-		h.Env.OdooDb, uid, h.Env.OdooPassword,
-		"product.product", "search_read",
-		[]any{domainFilter},
-		map[string]any{
-			"fields": []string{
-				"id",
-				"product_tmpl_id",
-				"barcode",
-				"name",
-				"type",
-				"description",
-				"description_sale",
-				"standard_price",
-				"list_price",
-			},
-			"limit": 1,
-		},
-	}, &body); err != nil {
-		log.Fatal(err)
+
+	domain := map[string]OdooField{
+		"id":               {"id", false},
+		"product_tmpl_id":  {"product_tmpl_id", false},
+		"barcode":          {"barcode", false},
+		"name":             {"name", false},
+		"description":      {"description", false},
+		"description_sale": {"description_sale", false},
+		"standard_price":   {"standard_price", false},
+		"list_price":       {"list_price", false},
+	}
+	domainFilter := []any{
+		[]any{"active", "=", true},
+		[]any{"sale_ok", "=", true},
+	}
+	if id != ":id" {
+		domainFilter = append(domainFilter, []any{"id", "=", id})
+	}
+	domainFields := map[string]any{
+		"limit": 1,
 	}
 
-	for i, record := range body {
-		for key, value := range record {
-			if value == false {
-				delete(body[i], key)
-			}
-		}
-	}
-
-	jsonData, err := json.Marshal(body)
+	jsonData, err := ReadAll(h, uid, models, "product.product", "search_read", domain, domainFilter, domainFields)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -213,41 +183,24 @@ func (h Handler) GetProduct(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 
+	domain = map[string]OdooField{
+		"id":               {"id", false},
+		"barcode":          {"barcode", false},
+		"name":             {"name", false},
+		"description":      {"description", false},
+		"description_sale": {"description_sale", false},
+		"standard_price":   {"standard_price", false},
+	}
 	domainFilter = []any{
 		[]any{"active", "=", true},
 		[]any{"sale_ok", "=", true},
 		[]any{"id", "=", int(odooProducts[0].Template[0].(float64))},
 	}
-
-	body = []map[string]any{}
-	if err := models.Call("execute_kw", []any{
-		h.Env.OdooDb, uid, h.Env.OdooPassword,
-		"product.template", "search_read",
-		[]any{domainFilter},
-		map[string]any{
-			"fields": []string{
-				"id",
-				"barcode",
-				"name",
-				"description",
-				"description_sale",
-				"standard_price",
-			},
-			"limit": 1,
-		},
-	}, &body); err != nil {
-		log.Fatal(err)
+	domainFields = map[string]any{
+		"limit": 1,
 	}
 
-	for i, record := range body {
-		for key, value := range record {
-			if value == false {
-				delete(body[i], key)
-			}
-		}
-	}
-
-	jsonData, err = json.Marshal(body)
+	jsonData, err = ReadAll(h, uid, models, "product.template", "search_read", domain, domainFilter, domainFields)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
