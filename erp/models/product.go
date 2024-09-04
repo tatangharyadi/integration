@@ -20,6 +20,6 @@ type Product struct {
 }
 
 type ProductId struct {
-	Id         int    `json:"id"`
-	UpdateDate string `json:"write_date"`
+	Id              int    `json:"id"`
+	UpdateTimestamp string `json:"update_timestamp"`
 }

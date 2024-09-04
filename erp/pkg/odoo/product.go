@@ -58,8 +58,8 @@ func MapProductId(odooProductIds []OdooProductId) []models.ProductId {
 	var productIds []models.ProductId
 	for _, productId := range odooProductIds {
 		productIds = append(productIds, models.ProductId{
-			Id:         productId.Id,
-			UpdateDate: productId.WriteDate,
+			Id:              productId.Id,
+			UpdateTimestamp: productId.WriteDate,
 		})
 	}
 	return productIds
