@@ -37,7 +37,7 @@ type OdooProductId struct {
 
 func MapProduct(odooProducts []OdooProduct, odooProductTemplates []OdooProduct) models.Product {
 	return models.Product{
-		ErpId:       odooProducts[0].Id,
+		Id:          odooProducts[0].Id,
 		Sku:         odooProducts[0].Barcode,
 		Barcode:     odooProducts[0].Barcode,
 		Name:        odooProducts[0].Name,
@@ -45,7 +45,7 @@ func MapProduct(odooProducts []OdooProduct, odooProductTemplates []OdooProduct) 
 		Cost:        odooProducts[0].StandardPrice,
 		Price:       odooProducts[0].ListPrice,
 		Parent: models.ParentProduct{
-			ErpId:       odooProductTemplates[0].Id,
+			Id:          odooProductTemplates[0].Id,
 			Sku:         odooProductTemplates[0].Barcode,
 			Name:        odooProductTemplates[0].Name,
 			Description: odooProductTemplates[0].Description,
@@ -58,7 +58,7 @@ func MapProductId(odooProductIds []OdooProductId) []models.ProductId {
 	var productIds []models.ProductId
 	for _, productId := range odooProductIds {
 		productIds = append(productIds, models.ProductId{
-			ErpId:      productId.Id,
+			Id:         productId.Id,
 			UpdateDate: productId.WriteDate,
 		})
 	}

@@ -1,7 +1,7 @@
 package models
 
 type ParentProduct struct {
-	ErpId       int     `json:"erp_id"`
+	Id          int     `json:"id"`
 	Sku         string  `json:"sku"`
 	Name        string  `json:"name"`
 	Description string  `json:"description"`
@@ -9,7 +9,7 @@ type ParentProduct struct {
 }
 
 type Product struct {
-	ErpId       int           `json:"erp_id"`
+	Id          int           `json:"id"`
 	Sku         string        `json:"sku"`
 	Barcode     string        `json:"barcode"`
 	Name        string        `json:"name"`
@@ -20,6 +20,6 @@ type Product struct {
 }
 
 type ProductId struct {
-	ErpId      int    `json:"erp_id"`
+	Id         int    `json:"id"`
 	UpdateDate string `json:"write_date"`
 }
