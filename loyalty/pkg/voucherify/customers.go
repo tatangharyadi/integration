@@ -52,8 +52,8 @@ func MapCustomer(customer VoucherifyCustomer) models.Customer {
 }
 
 func (h Handler) GetCustomer(w http.ResponseWriter, r *http.Request) {
-	customerId := chi.URLParam(r, "customerId")
-	url := fmt.Sprintf("%s/customers/%s", h.Env.LoyaltyUrl, customerId)
+	id := chi.URLParam(r, "id")
+	url := fmt.Sprintf("%s/customers/%s", h.Env.LoyaltyUrl, id)
 	client := &http.Client{}
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {

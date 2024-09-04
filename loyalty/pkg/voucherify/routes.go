@@ -14,6 +14,6 @@ type Handler struct {
 func (h Handler) Routes() chi.Router {
 	r := chi.NewRouter()
 
-	r.Get("/getcustomer/{customerId}", h.GetCustomer)
+	r.Get("/getcustomer/{id}", h.GetCustomer)
 	return r
 }
