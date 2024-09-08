@@ -1,0 +1,46 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: ${SERVICE}
+spec:
+  template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/maxScale: '5'
+    spec:
+      containerConcurrency: 80
+      containers:
+      - image: ${IMAGE}
+        env:
+        - name: APP_ENV
+          value: 'PROD'
+        - name: APP_PORT
+          value: '8080'
+        - name: DB_INSTANCE_HOST
+          valueFrom:
+            secretKeyRef:
+              key: latest
+              name: db_instance_host
+        - name: DB_INSTANCE_PORT
+          valueFrom:
+            secretKeyRef:
+              key: latest
+              name: db_instance_port
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              key: latest
+              name: db_user
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: latest
+              name: db_password
+        - name: DB_NAME
+          valueFrom:
+            secretKeyRef:
+              key: latest
+              name: db_name
+  traffic:
+  - percent: 100
+    latestRevision: true
