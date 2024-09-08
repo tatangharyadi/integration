@@ -27,7 +27,7 @@ func (h Handler) GetPlaceProducts(w http.ResponseWriter, r *http.Request) {
 			'price_effective_time', COALESCE(price_effective_time, ''),
 			'price_expire_time', COALESCE(price_expire_time, '')
 			)
-		) as price_infos
+		) as prices
 		FROM products
 		LEFT JOIN price_infos ON
 		price_infos.product_id = products.id
@@ -45,9 +45,9 @@ func (h Handler) GetPlaceProducts(w http.ResponseWriter, r *http.Request) {
 			jsonb_build_object(
 			'sku', cteModifier.sku,
 			'name', cteModifier.name,
-			'price_infos', price_infos
+			'prices', cteModifier.prices
 			)
-		) AS modifier
+		) AS modifiers
 		FROM products mc
 		LEFT JOIN product_relations ON
 		product_relations.parent_product_id = mc.id
@@ -70,7 +70,7 @@ func (h Handler) GetPlaceProducts(w http.ResponseWriter, r *http.Request) {
 			'name', cteModifierCollection.name,
 			'selection_min', cteModifierCollection.selection_min,
 			'selection_max', cteModifierCollection.selection_max,
-			'modifier', cteModifierCollection.modifier
+			'modifiers', cteModifierCollection.modifiers
 			)
 		) as modifier_collection
 		FROM products p
