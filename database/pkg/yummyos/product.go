@@ -92,7 +92,7 @@ func (h Handler) GetPlaceProducts(w http.ResponseWriter, r *http.Request) {
 			'price_effective_time', COALESCE(price_effective_time, ''),
 			'price_expire_time', COALESCE(price_expire_time, '')
 			)
-		) as price_infos
+		) as prices
 		FROM local_inventories
 		INNER JOIN price_infos ON
 		price_infos.id = local_inventories.price_info_id
@@ -108,7 +108,7 @@ func (h Handler) GetPlaceProducts(w http.ResponseWriter, r *http.Request) {
 		description,
 		image,
 		cost,
-		price_infos,
+		prices,
 		modifier_collection,
 		local_inventories.availability,
 		local_inventories.updated_at AS update_timestamp
@@ -131,7 +131,7 @@ func (h Handler) GetPlaceProducts(w http.ResponseWriter, r *http.Request) {
 			cteLocal.description,
 			cteLocal.image,
 			cost,
-			price_infos,
+			prices,
 			modifier_collection,
 			availability,
 			update_timestamp
