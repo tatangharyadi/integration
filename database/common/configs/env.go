@@ -12,7 +12,6 @@ type Env struct {
 	AppEnv         string `mapstructure:"APP_ENV"`
 	AppPort        string `mapstructure:"APP_PORT"`
 	DbInstanceHost string `mapstructure:"DB_INSTANCE_HOST"`
-	DbInstancePort string `mapstructure:"DB_INSTANCE_PORT"`
 	DbUser         string `mapstructure:"DB_USER"`
 	DbPassword     string `mapstructure:"DB_PASSWORD"`
 	DbName         string `mapstructure:"DB_NAME"`
@@ -28,7 +27,6 @@ func InitEnv() (*Env, zerolog.Logger) {
 	viper.BindEnv("APP_ENV")
 	viper.BindEnv("APP_PORT")
 	viper.BindEnv("DB_INSTANCE_HOST")
-	viper.BindEnv("DB_INSTANCE_PORT")
 	viper.BindEnv("DB_USER")
 	viper.BindEnv("DB_PASSWORD")
 	viper.BindEnv("DB_NAME")

@@ -4,9 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net"
 	"net/http"
-	"time"
 
+	"cloud.google.com/go/cloudsqlconn"
 	"github.com/go-chi/chi/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -143,19 +144,24 @@ func (h Handler) GetPlaceProducts(w http.ResponseWriter, r *http.Request) {
 	`
 
 	id := chi.URLParam(r, "id")
-	dbURI := fmt.Sprintf("host=%s port=%s user=%s password=%s database=%s",
-		h.Env.DbInstanceHost, h.Env.DbInstancePort,
+	dsn := fmt.Sprintf("user=%s password=%s database=%s sslmode=disable",
 		h.Env.DbUser, h.Env.DbPassword, h.Env.DbName)
 
-	config, err := pgxpool.ParseConfig(dbURI)
+	config, err := pgxpool.ParseConfig(dsn)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	config.MaxConns = 25
-	config.MinConns = 5
-	config.MaxConnLifetime = 5 * time.Minute
+	d, err := cloudsqlconn.NewDialer(context.Background())
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	config.ConnConfig.DialFunc = func(ctx context.Context, network, instance string) (net.Conn, error) {
+		return d.Dial(ctx, h.Env.DbInstanceHost)
+	}
 
 	dbPool, err := pgxpool.NewWithConfig(context.Background(), config)
 	if err != nil {
