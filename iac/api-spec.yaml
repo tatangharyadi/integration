@@ -18,6 +18,10 @@ tags:
     description: "ERP"
   - name: "odoo"
     description: "Odoo"
+  - name: "database"
+    description: "Database"
+  - name: "yummyos"
+    description: "YummyOS"
   - name: "loyalty"
     description: "Loyalty"
   - name: "voucherify"
@@ -53,6 +57,25 @@ paths:
       operationId: "helloErp"
       x-google-backend:
         address: https://integration-erp-238488984298.asia-southeast2.run.app
+        path_translation: CONSTANT_ADDRESS
+      security:
+        - api_key: []
+      produces:
+        - "application/json"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            type: "string"
+            example: "Hello, World!"
+  /hello/database:
+    get:
+      tags:
+        - "database"
+      summary: "Hello World"
+      operationId: "helloDatabase"
+      x-google-backend:
+        address: https://integration-database-238488984298.asia-southeast2.run.app
         path_translation: CONSTANT_ADDRESS
       security:
         - api_key: []
@@ -158,7 +181,9 @@ paths:
         201:
           description: "successful operation"
           schema:
-            $ref: "#/definitions/ProductId"
+            type: "array"
+            items:
+              $ref: "#/definitions/ProductId"
         404:
           description: "Product IDs not found"
   /odoo/getproduct/{id}:
@@ -187,6 +212,37 @@ paths:
           description: "successful operation"
           schema:
             $ref: "#/definitions/Product"
+        404:
+          description: "Product not found"
+          
+  /yummyos/getplaceproducts/{id}:
+    get:
+      tags:
+        - "yummyos"
+      summary: "Get products by place ID"
+      operationId: "getPlaceProducts"
+      x-google-backend:
+        address: https://integration-database-238488984298.asia-southeast2.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+      security:
+        - api_key: []
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "id"
+          in: "path"
+          description: "ID of place to return its products"
+          required: true
+          type: "string"
+      responses:
+        201:
+          description: "successful operation"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Product"
         404:
           description: "Product not found"
 
@@ -315,6 +371,20 @@ definitions:
       price:
         type: "number"
         format: "float"
+      prices:
+        type: "array"
+        items: 
+          $ref: "#/definitions/Price"
+      modifier_collection:
+        type: "array"
+        items:
+          $ref: "#/definitions/ModifierCollection"
+      availability:
+        type: "string"
+        example: "IN_STOCK"
+      update_timestamp:
+        type: "string"
+        format: "date-time"
       parent:
         $ref: "#/definitions/ParentProduct"
   ParentProduct:
@@ -337,6 +407,48 @@ definitions:
       cost:
         type: "number"
         format: "float"
+  ModifierCollection:
+    type: "object"
+    properties:
+      name:
+        type: "string"
+      selection_min:
+        type: "integer"
+        format: "int64"
+      selection_max:
+        type: "integer"
+        format: "int64"
+      modifiers:
+        type: "array"
+        items:
+          $ref: "#/definitions/Modifier"
+  Modifier:
+    type: "object"
+    properties:
+      sku:
+        type: "string"
+      name:
+        type: "string"
+      prices:
+        type: "array"
+        items:
+          $ref: "#/definitions/Price"
+  Price:
+    type: "object"
+    properties:
+      price:
+        type: "number"
+        format: "float"
+      currency_code:
+        type: "string"
+        example: "IDR"
+      price_effective_time:
+        type: "string"
+        format: "date-time"
+      price_expiry_time:
+        type: "string"
+        format: "date-time"
+
 
   Customer:
     type: "object"
