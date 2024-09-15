@@ -27,7 +27,7 @@ func InitEnv() (*Env, zerolog.Logger) {
 	viper.BindEnv("APP_PORT")
 	viper.BindEnv("PAYMENT_URL")
 	viper.BindEnv("GCP_PROJECT_ID")
-	viper.AddConfigPath("QR_PAYMENT_TOPIC")
+	viper.BindEnv("QR_PAYMENT_TOPIC")
 
 	viper.SetConfigFile(".env")
 	err := viper.ReadInConfig()
