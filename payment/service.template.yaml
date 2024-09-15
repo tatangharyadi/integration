@@ -18,7 +18,7 @@ spec:
           value: '8080'
         - name: PAYMENT_URL
           value: 'https://api.xendit.co'
-        - name: GPC_PROJECT_ID
+        - name: GCP_PROJECT_ID
           valueFrom:
             secretKeyRef:
               key: latest
