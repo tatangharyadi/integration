@@ -62,6 +62,6 @@ require (
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.19 // indirect
 	github.com/spf13/viper v1.19.0
-	github.com/tatangharyadi/pos-common v0.1.2
+	github.com/tatangharyadi/pos-common v0.1.3
 	golang.org/x/sys v0.24.0 // indirect
 )
