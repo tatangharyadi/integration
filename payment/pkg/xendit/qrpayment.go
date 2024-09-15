@@ -32,7 +32,7 @@ type XenditBasket struct {
 	SubCategory string  `json:"sub_category"`
 }
 
-type XenditQrPayment struct {
+type XenditData struct {
 	Id            string              `json:"id"`
 	BusinessId    string              `json:"business_id"`
 	Currency      string              `json:"currency"`
@@ -50,33 +50,41 @@ type XenditQrPayment struct {
 	PaymentDetail XenditPaymentDetail `json:"payment_detail"`
 }
 
+type XenditQrPayment struct {
+	Event      string     `json:"event"`
+	ApiVersion string     `json:"api_version"`
+	BusinessId string     `json:"business_id"`
+	Created    string     `json:"created"`
+	Data       XenditData `json:"data"`
+}
+
 func MapQRPayment(xenditQrPayment XenditQrPayment) message.QrPayment {
 	var data = message.QrPayment_Data{
-		Id:          xenditQrPayment.Id,
-		BusinessId:  xenditQrPayment.BusinessId,
-		Currency:    xenditQrPayment.Currency,
-		Amount:      float32(xenditQrPayment.Amount),
-		Status:      xenditQrPayment.Status,
-		Created:     xenditQrPayment.Created,
-		QrId:        xenditQrPayment.QrId,
-		QrString:    xenditQrPayment.QrString,
-		ReferenceId: xenditQrPayment.ReferenceId,
-		Type:        xenditQrPayment.Type,
-		ChannelCode: xenditQrPayment.ChannelCode,
-		ExpiresAt:   xenditQrPayment.ExpireAt,
+		Id:          xenditQrPayment.Data.Id,
+		BusinessId:  xenditQrPayment.Data.BusinessId,
+		Currency:    xenditQrPayment.Data.Currency,
+		Amount:      float32(xenditQrPayment.Data.Amount),
+		Status:      xenditQrPayment.Data.Status,
+		Created:     xenditQrPayment.Data.Created,
+		QrId:        xenditQrPayment.Data.QrId,
+		QrString:    xenditQrPayment.Data.QrString,
+		ReferenceId: xenditQrPayment.Data.ReferenceId,
+		Type:        xenditQrPayment.Data.Type,
+		ChannelCode: xenditQrPayment.Data.ChannelCode,
+		ExpiresAt:   xenditQrPayment.Data.ExpireAt,
 		PaymentDetail: &message.QrPayment_Data_PaymentDetail{
-			ReceiptId:      xenditQrPayment.PaymentDetail.ReceiptId,
-			Source:         xenditQrPayment.PaymentDetail.Source,
-			Name:           xenditQrPayment.PaymentDetail.Name,
-			AccountDetails: xenditQrPayment.PaymentDetail.AccountDetails,
+			ReceiptId:      xenditQrPayment.Data.PaymentDetail.ReceiptId,
+			Source:         xenditQrPayment.Data.PaymentDetail.Source,
+			Name:           xenditQrPayment.Data.PaymentDetail.Name,
+			AccountDetails: xenditQrPayment.Data.PaymentDetail.AccountDetails,
 		},
 	}
 
 	return message.QrPayment{
-		Token: xenditQrPayment.Metadata.Token,
+		Token: xenditQrPayment.Data.Metadata.Token,
 		Notification: &message.QrPayment_Notification{
 			Title: "qr-payment",
-			Body:  xenditQrPayment.Status,
+			Body:  xenditQrPayment.Data.Status,
 		},
 		Data: &data,
 	}
@@ -90,7 +98,6 @@ func (h Handler) CallbackQrPayment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//	qrPayment.Token = "diZjYadBT0KKj1YRZQwQp7:APA91bEnmxuYzvCdvx8uqIr0AlFbHfhPOBAQzdvVmi3JUfzzGaKeo56JIiyMTKmYtJOfx-2KiGNKM0OhBAjrwusFzGlWb7QhDwOGrKGOdgA3n5zycjjUzAeojqamw8NYxwzWp0NUHOyE"
 	qrPayment := MapQRPayment(xenditQrPayment)
 	if err := pubsub.PublishProtoMessages(h.Env.GCPProjectId, h.Env.QrPaymentTopic, &qrPayment); err != nil {
 		h.Logger.Error().Err(err).Msg("Error publish message to Pub/Sub")
