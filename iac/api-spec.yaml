@@ -28,6 +28,8 @@ tags:
     description: "Voucherify"
   - name: "payment"
     description: "Payment"
+  - name: "xendit"
+    description: "Xendit"
 
 paths:
   /hello/auth:
@@ -245,6 +247,30 @@ paths:
               $ref: "#/definitions/Product"
         404:
           description: "Product not found"
+          
+  /xendit/callbackqrpayment:
+    post:
+      tags:
+        - "odoo"
+      summary: "Get one or more product IDs"
+      operationId: "callbackQrPayment"
+      x-google-backend:
+        address: https://integration-payment-238488984298.asia-southeast2.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+      security:
+        - api_key: []
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      responses:
+        201:
+          description: "successful operation"
+          schema:
+            type: "string"
+            example: "Callback QR Payment success"
+        404:
+          description: "Callback QR Payment failed"
 
   /voucherify/getcustomer/{id}:
     get:
@@ -272,6 +298,8 @@ paths:
             $ref: "#/definitions/Customer"
         404:
           description: "Customer not found"
+          
+  
 
 securityDefinitions:
   api_key:
