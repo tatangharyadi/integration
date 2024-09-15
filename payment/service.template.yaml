@@ -24,7 +24,8 @@ spec:
               key: latest
               name: gcp-project-id
         - name: QR_PAYMENT_TOPIC
-          value: 'qr-payment'
+          value: 'projects/yummyos-prod/topics/qr-payment'
+          
   traffic:
   - percent: 100
     latestRevision: true
