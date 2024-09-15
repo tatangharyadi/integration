@@ -9,9 +9,11 @@ import (
 )
 
 type Env struct {
-	AppEnv     string `mapstructure:"APP_ENV"`
-	AppPort    string `mapstructure:"APP_PORT"`
-	PaymentUrl string `mapstructure:"PAYMENT_URL"`
+	AppEnv         string `mapstructure:"APP_ENV"`
+	AppPort        string `mapstructure:"APP_PORT"`
+	PaymentUrl     string `mapstructure:"PAYMENT_URL"`
+	GCPProjectId   string `mapstructure:"GCP_PROJECT_ID"`
+	QrPaymentTopic string `mapstructure:"QR_PAYMENT_TOPIC"`
 }
 
 var logger zerolog.Logger
@@ -24,6 +26,8 @@ func InitEnv() (*Env, zerolog.Logger) {
 	viper.BindEnv("APP_ENV")
 	viper.BindEnv("APP_PORT")
 	viper.BindEnv("PAYMENT_URL")
+	viper.BindEnv("GCP_PROJECT_ID")
+	viper.AddConfigPath("QR_PAYMENT_TOPIC")
 
 	viper.SetConfigFile(".env")
 	err := viper.ReadInConfig()
