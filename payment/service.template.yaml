@@ -18,6 +18,11 @@ spec:
           value: '8080'
         - name: PAYMENT_URL
           value: 'https://api.xendit.co'
+        - name: XENDIT_WEBHOOK_TOKEN
+          valueFrom:
+            secretKeyRef:
+              key: latest
+              name: xendit-webhook-token
         - name: GCP_PROJECT_ID
           valueFrom:
             secretKeyRef:

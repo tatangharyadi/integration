@@ -91,6 +91,12 @@ func MapQRPayment(xenditQrPayment XenditQrPayment) message.QrPayment {
 }
 
 func (h Handler) CallbackQrPayment(w http.ResponseWriter, r *http.Request) {
+	callbackToken := r.Header.Get("x-callback-token")
+	if callbackToken != h.Env.XenditWebhookToken {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
 	var xenditQrPayment XenditQrPayment
 	err := json.NewDecoder(r.Body).Decode(&xenditQrPayment)
 	if err != nil {
