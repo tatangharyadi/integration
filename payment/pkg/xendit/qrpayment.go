@@ -119,7 +119,7 @@ func (h Handler) CreateQrPayment(w http.ResponseWriter, r *http.Request) {
 
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("api-version", h.Env.XenditApiVersion)
-	req.SetBasicAuth(h.Env.XenditMoneyinKey, "")
+	req.SetBasicAuth(h.Env.XenditMoneyinSecretKey, "")
 
 	resp, err := client.Do(req)
 	if err != nil {

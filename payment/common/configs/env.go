@@ -9,15 +9,15 @@ import (
 )
 
 type Env struct {
-	AppEnv             string `mapstructure:"APP_ENV"`
-	AppPort            string `mapstructure:"APP_PORT"`
-	PaymentUrl         string `mapstructure:"PAYMENT_URL"`
-	XenditApiVersion   string `mapstructure:"XENDIT_API_VERSION"`
-	XenditMoneyinKey   string `mapstructure:"XENDIT_MONEYIN_KEY"`
-	XenditWebhookToken string `mapstructure:"XENDIT_WEBHOOK_TOKEN"`
-	XenditCallbackUrl  string `mapstructure:"XENDIT_CALLBACK_URL"`
-	GCPProjectId       string `mapstructure:"GCP_PROJECT_ID"`
-	QrPaymentTopic     string `mapstructure:"QR_PAYMENT_TOPIC"`
+	AppEnv                 string `mapstructure:"APP_ENV"`
+	AppPort                string `mapstructure:"APP_PORT"`
+	PaymentUrl             string `mapstructure:"PAYMENT_URL"`
+	XenditApiVersion       string `mapstructure:"XENDIT_API_VERSION"`
+	XenditMoneyinSecretKey string `mapstructure:"XENDIT_MONEYIN_SECRET_KEY"`
+	XenditWebhookToken     string `mapstructure:"XENDIT_WEBHOOK_TOKEN"`
+	XenditCallbackUrl      string `mapstructure:"XENDIT_CALLBACK_URL"`
+	GCPProjectId           string `mapstructure:"GCP_PROJECT_ID"`
+	QrPaymentTopic         string `mapstructure:"QR_PAYMENT_TOPIC"`
 }
 
 var logger zerolog.Logger
@@ -31,7 +31,7 @@ func InitEnv() (*Env, zerolog.Logger) {
 	viper.BindEnv("APP_PORT")
 	viper.BindEnv("PAYMENT_URL")
 	viper.BindEnv("XENDIT_API_VERSION")
-	viper.BindEnv("XENDIT_MONEYIN_KEY")
+	viper.BindEnv("XENDIT_MONEYIN_SECRET_KEY")
 	viper.BindEnv("XENDIT_WEBHOOK_TOKEN")
 	viper.BindEnv("XENDIT_CALLBACK_URL")
 	viper.BindEnv("GCP_PROJECT_ID")

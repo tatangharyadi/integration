@@ -20,11 +20,11 @@ spec:
           value: 'https://api.xendit.co'
         - name: XENDIT_API_VERSION
           value: '2022-07-31'
-        - name: XENDIT_MONEYIN_KEY
+        - name: XENDIT_MONEYIN_SECRET_KEY
           valueFrom:
             secretKeyRef:
               key: latest
-              name: xendit-moneyin-key
+              name: xendit-moneyin-secret_key
         - name: XENDIT_WEBHOOK_TOKEN
           valueFrom:
             secretKeyRef:
