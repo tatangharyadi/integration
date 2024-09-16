@@ -14,6 +14,7 @@ type Handler struct {
 func (h Handler) Routes() chi.Router {
 	r := chi.NewRouter()
 
+	r.Post("/createqrpayment", h.CreateQrPayment)
 	r.Post("/callbackqrpayment", h.CallbackQrPayment)
 	return r
 }

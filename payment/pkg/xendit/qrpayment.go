@@ -1,9 +1,13 @@
 package xendit
 
 import (
+	"bytes"
 	"encoding/json"
+	"fmt"
+	"io"
 	"net/http"
 
+	"github.com/tatangharyadi/integration/payment/models"
 	pubsub "github.com/tatangharyadi/pos-common/common/pubsub"
 	message "github.com/tatangharyadi/pos-common/protobuf/message"
 )
@@ -88,6 +92,50 @@ func MapQRPayment(xenditQrPayment XenditQrPayment) message.QrPayment {
 		},
 		Data: &data,
 	}
+}
+
+func (h Handler) CreateQrPayment(w http.ResponseWriter, r *http.Request) {
+	var qrPayment models.QrPayment
+	err := json.NewDecoder(r.Body).Decode(&qrPayment)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	qrPayment.Type = "DYNAMIC"
+
+	url := fmt.Sprintf("%s/qr_codes", h.Env.PaymentUrl)
+	client := &http.Client{}
+	qrPaymentBytes, err := json.Marshal(qrPayment)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(qrPaymentBytes))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("api-version", h.Env.XenditApiVersion)
+	req.SetBasicAuth(h.Env.XenditMoneyinKey, "")
+
+	resp, err := client.Do(req)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(body)
 }
 
 func (h Handler) CallbackQrPayment(w http.ResponseWriter, r *http.Request) {
