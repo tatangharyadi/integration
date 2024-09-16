@@ -134,8 +134,19 @@ func (h Handler) CreateQrPayment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if err := json.Unmarshal(body, &qrPayment); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	resJson, err := json.Marshal(qrPayment)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	w.Header().Set("Content-Type", "application/json")
-	w.Write(body)
+	w.Write(resJson)
 }
 
 func (h Handler) CallbackQrPayment(w http.ResponseWriter, r *http.Request) {
