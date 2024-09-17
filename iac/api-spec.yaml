@@ -149,7 +149,7 @@ paths:
           schema:
             $ref: "#/definitions/Client"
       responses:
-        201:
+        200:
           description: "successful operation"
           schema:
             $ref: "#/definitions/Token"
@@ -180,7 +180,7 @@ paths:
           schema:
             $ref: "#/definitions/DateRange"
       responses:
-        201:
+        200:
           description: "successful operation"
           schema:
             type: "array"
@@ -210,7 +210,7 @@ paths:
           required: true
           type: "string"
       responses:
-        201:
+        200:
           description: "successful operation"
           schema:
             $ref: "#/definitions/Product"
@@ -239,7 +239,7 @@ paths:
           required: true
           type: "string"
       responses:
-        201:
+        200:
           description: "successful operation"
           schema:
             type: "array"
@@ -248,12 +248,12 @@ paths:
         404:
           description: "Product not found"
           
-  /xendit/callbackqrpayment:
+  /xendit/createqrpayment:
     post:
       tags:
-        - "odoo"
-      summary: "Get one or more product IDs"
-      operationId: "callbackQrPayment"
+        - "xendit"
+      summary: "Create a QR Payment to Xendit"
+      operationId: "createQrPayment"
       x-google-backend:
         address: https://integration-payment-238488984298.asia-southeast2.run.app
         path_translation: APPEND_PATH_TO_ADDRESS
@@ -263,12 +263,52 @@ paths:
         - "application/json"
       produces:
         - "application/json"
+      parameters:
+        - name: "body"
+          in: "body"
+          description: "QR Payment object"
+          required: true
+          schema:
+            $ref: "#/definitions/QrPayment"
       responses:
-        201:
+        200:
           description: "successful operation"
           schema:
-            type: "string"
-            example: "Callback QR Payment success"
+            $ref: "#/definitions/QrPayment"
+        404:
+          description: "Create QR Payment failed"
+  /xendit/callbackqrpayment:
+    post:
+      tags:
+        - "xendit"
+      summary: "Callback for Xendit to send QR Payment status"
+      operationId: "callbackQrPayment"
+      x-google-backend:
+        address: https://integration-payment-238488984298.asia-southeast2.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "x-callback-token"
+          in: "header"
+          description: "Xendit webhook token"
+          required: true
+          type: "string"
+        - name: "webhook-id"
+          in: "header"
+          description: "callback unique identifier for a specific payment"
+          type: "string"
+        - name: "body"
+          in: "body"
+          description: "QR Payment object"
+          required: true
+          schema:
+            $ref: "#/definitions/XenditQrPayment"
+      responses:
+        200:
+          description: "successful operation"
         404:
           description: "Callback QR Payment failed"
 
@@ -514,3 +554,137 @@ definitions:
       transaction_timestamp:
         type: "string"
         format: "date-time"
+        
+  QrPayment:
+    type: "object"
+    properties:
+      reference_id:
+        type: "string"
+        example: "order-id-1666420204"
+      type:
+        type: "string"
+        example: "DYNAMIC"
+      currency:
+        type: "string"
+        example: "IDR"
+      amount:
+        type: "number"
+        format: "float"
+      qr_string:
+        type: "string"
+        example: "0002010102##########CO.XENDIT.WWW011893600#######14220002152#####414220010303TTT####015CO.XENDIT.WWW02180000000000000000000TTT52045######ID5911XenditQRIS6007Jakarta6105121606##########3k1mOnF73h11111111#3k1mOnF73h6v53033605401163040BDB"
+      status:
+        type: "string"
+        example: "ACTIVE"
+      metadata:
+        $ref: "#/definitions/PaymentMetadata"
+  PaymentMetadata:
+    type: "object"
+    properties:
+      token:
+        type: "string"
+        
+  XenditQrPayment:
+    type: "object"
+    properties:
+      event:
+        type: "string"
+        example: "qr.payment"
+      api_version:
+        type: "string"
+        example: "2022-07-31"
+      business_id:
+        type: "string"
+        example: "58cd618ba0464eb64acdb246"
+      created:
+        type: "string"
+        format: "date-time"
+      data:
+        $ref: "#/definitions/XenditData"
+  XenditData:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+        example: "qrpy_8182837te-87st-49ing-8696-1239bd4d759c"
+      business_id:
+        type: "string"
+        example: "58cd618ba0464eb64acdb246"
+      currency:
+        type: "string"
+        example: "IDR"
+      amount:
+        type: "number"
+        format: "float"
+      status:
+        type: "string"
+        example: "SUCCEEDED"
+      created:
+        type: "string"
+        format: "date-time"
+      qr_id:
+        type: "string"
+        example: "qr_61cb3576-3a25-4d35-8d15-0e8e3bdba4f2"
+      qr_string:
+        type: "string"
+        example: "0002010102##########CO.XENDIT.WWW011893600#######14220002152#####414220010303TTT####015CO.XENDIT.WWW02180000000000000000000TTT52045######ID5911XenditQRIS6007Jakarta6105121606##########3k1mOnF73h11111111#3k1mOnF73h6v53033605401163040BDB"
+      reference_id:
+        type: "string"
+        example: "order-id-1666420204"
+      type:
+        type: "string"
+        example: "DYNAMIC"
+      channel_code:
+        type: "string"
+        example: "ID_DANA"
+      expires_at:
+        type: "string"
+        format: "date-time"
+      basket:
+        type: "array"
+        items:
+          $ref: "#/definitions/XenditBasket"
+      metadata:
+        $ref: "#/definitions/PaymentMetadata"
+      payment_detail:
+        $ref: "#/definitions/XenditPaymentDetail"
+  XenditBasket:
+    type: "object"
+    properties:
+      reference_id:
+        type: "string"
+      name:
+        type: "string"
+      category:
+        type: "string"
+      currency:
+        type: "string"
+        example: "IDR"
+      price:
+        type: "number"
+        format: "float"
+      quantity:
+        type: "integer"
+        format: "int64"
+      type:
+        type: "string"
+        example: "PRODUCT"
+      url:
+        type: "string"
+      description:
+        type: "string"
+      sub_category:
+        type: "string"
+  XenditPaymentDetail:
+    type: "object"
+    properties:
+      receipt_id:
+        type: "string"
+        example: "000111666"
+      source:
+        type: "string"
+        example: "GOPAY"
+      name:
+        type: "string"
+      account_details:
+        type: "string"
