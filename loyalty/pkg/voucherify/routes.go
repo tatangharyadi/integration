@@ -15,5 +15,6 @@ func (h Handler) Routes() chi.Router {
 	r := chi.NewRouter()
 
 	r.Get("/getcustomer/{id}", h.GetCustomer)
+	r.Post("/importcustomers", h.ImportCustomers)
 	return r
 }

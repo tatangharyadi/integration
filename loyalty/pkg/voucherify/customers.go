@@ -1,10 +1,13 @@
 package voucherify
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
+	"sync"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/tatangharyadi/integration/loyalty/models"
@@ -18,6 +21,8 @@ type VoucherifyCredit struct {
 }
 
 type VoucherifyMetadata struct {
+	CompanyId      string           `json:"company_id"`
+	MealBenefit    VoucherifyCredit `json:"meal_benefit"`
 	CompanyBenefit VoucherifyCredit `json:"company_benefit"`
 	PersonalCredit VoucherifyCredit `json:"personal_credit"`
 }
@@ -32,10 +37,17 @@ type VoucherifyCustomer struct {
 
 func MapCustomer(customer VoucherifyCustomer) models.Customer {
 	return models.Customer{
-		Id:    customer.SourceId,
-		Name:  customer.Name,
-		Email: customer.Email,
-		Phone: customer.Phone,
+		Id:        customer.SourceId,
+		CompanyId: customer.Metadata.CompanyId,
+		Name:      customer.Name,
+		Email:     customer.Email,
+		Phone:     customer.Phone,
+		MealBenefit: models.Credit{
+			Cycle:                customer.Metadata.CompanyBenefit.Cycle,
+			Limit:                customer.Metadata.CompanyBenefit.Limit,
+			Balance:              customer.Metadata.CompanyBenefit.Balance,
+			TransactionTimestamp: customer.Metadata.CompanyBenefit.LastTransactionDate,
+		},
 		CompanyBenefit: models.Credit{
 			Cycle:                customer.Metadata.CompanyBenefit.Cycle,
 			Limit:                customer.Metadata.CompanyBenefit.Limit,
@@ -47,6 +59,36 @@ func MapCustomer(customer VoucherifyCustomer) models.Customer {
 			Limit:                customer.Metadata.PersonalCredit.Limit,
 			Balance:              customer.Metadata.PersonalCredit.Balance,
 			TransactionTimestamp: customer.Metadata.PersonalCredit.LastTransactionDate,
+		},
+	}
+}
+
+func MapVoucherify(customer models.Customer) VoucherifyCustomer {
+	return VoucherifyCustomer{
+		SourceId: customer.Id,
+		Name:     customer.Name,
+		Email:    customer.Email,
+		Phone:    customer.Phone,
+		Metadata: VoucherifyMetadata{
+			CompanyId: customer.CompanyId,
+			MealBenefit: VoucherifyCredit{
+				Cycle:               customer.MealBenefit.Cycle,
+				Limit:               customer.MealBenefit.Limit,
+				Balance:             customer.MealBenefit.Balance,
+				LastTransactionDate: time.Now().Format("2006-01-02T15:04:05.000Z"),
+			},
+			CompanyBenefit: VoucherifyCredit{
+				Cycle:               customer.CompanyBenefit.Cycle,
+				Limit:               customer.CompanyBenefit.Limit,
+				Balance:             customer.CompanyBenefit.Balance,
+				LastTransactionDate: time.Now().Format("2006-01-02T15:04:05.000Z"),
+			},
+			PersonalCredit: VoucherifyCredit{
+				Cycle:               customer.PersonalCredit.Cycle,
+				Limit:               customer.PersonalCredit.Limit,
+				Balance:             customer.PersonalCredit.Balance,
+				LastTransactionDate: time.Now().Format("2006-01-02T15:04:05.000Z"),
+			},
 		},
 	}
 }
@@ -91,5 +133,83 @@ func (h Handler) GetCustomer(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
+	w.Write(resJson)
+}
+
+func ImportCustomer(h Handler, customer models.Customer,
+	ch chan<- []byte, wg *sync.WaitGroup) interface{} {
+	h.Logger.Info().Msgf("Importing customer %s", customer.Id)
+	defer wg.Done()
+
+	url := fmt.Sprintf("%s/customers", h.Env.LoyaltyUrl)
+	client := &http.Client{}
+	voucherifyCustomer := MapVoucherify(customer)
+	customerBytes, err := json.Marshal(voucherifyCustomer)
+	if err != nil {
+		return err
+	}
+
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(customerBytes))
+	if err != nil {
+		return err
+	}
+
+	req.Header.Set("X-App-Id", h.Env.VoucherifyId)
+	req.Header.Set("X-App-Token", h.Env.VoucherifySecretKey)
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+
+	ch <- body
+
+	return nil
+}
+
+func (h Handler) ImportCustomers(w http.ResponseWriter, r *http.Request) {
+	var customers []models.Customer
+	if err := json.NewDecoder(r.Body).Decode(&customers); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	ch := make(chan []byte)
+	var wg sync.WaitGroup
+
+	for _, customer := range customers {
+		wg.Add(1)
+		go ImportCustomer(h, customer, ch, &wg)
+	}
+
+	go func() {
+		wg.Wait()
+		close(ch)
+	}()
+
+	var vaucherifyCustomers []VoucherifyCustomer
+	for result := range ch {
+		var voucherifyCustomer VoucherifyCustomer
+		if err := json.Unmarshal(result, &voucherifyCustomer); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		vaucherifyCustomers = append(vaucherifyCustomers, voucherifyCustomer)
+	}
+
+	resJson, err := json.Marshal(vaucherifyCustomers)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
 	w.Write(resJson)
 }

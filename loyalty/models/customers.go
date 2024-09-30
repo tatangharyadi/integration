@@ -9,9 +9,11 @@ type Credit struct {
 
 type Customer struct {
 	Id             string `json:"id"`
+	CompanyId      string `json:"company_id"`
 	Name           string `json:"name"`
 	Email          string `json:"email"`
 	Phone          string `json:"phone"`
+	MealBenefit    Credit `json:"meal_benefit"`
 	CompanyBenefit Credit `json:"company_benefit"`
 	PersonalCredit Credit `json:"personal_credit"`
 }
