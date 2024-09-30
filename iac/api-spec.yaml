@@ -338,6 +338,33 @@ paths:
             $ref: "#/definitions/Customer"
         404:
           description: "Customer not found"
+  /voucherify/importcustomers:
+    post:
+      tags:
+        - "voucherify"
+      summary: "Import customers"
+      operationId: "importCustomers"
+      x-google-backend:
+        address: https://integration-loyalty-238488984298.asia-southeast2.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+      security:
+        - api_key: []
+      produces:
+        - "application/json"
+      parameters:
+        - name: "body"
+          in: "body"
+          description: "Customer objects"
+          required: true
+          schema:
+            $ref: "#/definitions/Customers"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Customer"
           
   
 
@@ -518,6 +545,13 @@ definitions:
         format: "date-time"
 
 
+  Customers:
+    type: "object"
+    properties:
+      customers:
+        type: "array"
+        items:
+          $ref: "#/definitions/Customer"
   Customer:
     type: "object"
     required:
@@ -526,6 +560,9 @@ definitions:
       id:
         type: "string"
         example: "GPAS-123"
+      company_id:
+        type: "string"
+        example: "123"
       name:
         type: "string"
         example: "name"
@@ -535,6 +572,8 @@ definitions:
       phone:
         type: "string"
         example: "+62123"
+      meal_benefit:
+        $ref: "#/definitions/Credit"
       company_benefit:
         $ref: "#/definitions/Credit"
       personal_credit:
