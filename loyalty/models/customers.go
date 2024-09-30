@@ -17,3 +17,7 @@ type Customer struct {
 	CompanyBenefit Credit `json:"company_benefit"`
 	PersonalCredit Credit `json:"personal_credit"`
 }
+
+type Customers struct {
+	Customers []Customer `json:"customers"`
+}

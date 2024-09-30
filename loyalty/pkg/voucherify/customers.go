@@ -175,7 +175,7 @@ func ImportCustomer(h Handler, customer models.Customer,
 }
 
 func (h Handler) ImportCustomers(w http.ResponseWriter, r *http.Request) {
-	var customers []models.Customer
+	var customers models.Customers
 	if err := json.NewDecoder(r.Body).Decode(&customers); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -184,7 +184,7 @@ func (h Handler) ImportCustomers(w http.ResponseWriter, r *http.Request) {
 	ch := make(chan []byte)
 	var wg sync.WaitGroup
 
-	for _, customer := range customers {
+	for _, customer := range customers.Customers {
 		wg.Add(1)
 		go ImportCustomer(h, customer, ch, &wg)
 	}
