@@ -14,7 +14,7 @@ provider "google" {
 resource "google_compute_region_network_endpoint_group" "neg" {
   provider              = google-beta
   project               = var.project_id
-  region                = var.region
+  region                = "asia-northeast1"
   name                  = "pos-api-neg"
   network_endpoint_type = "SERVERLESS"
   serverless_deployment {
@@ -25,16 +25,11 @@ resource "google_compute_region_network_endpoint_group" "neg" {
 
 resource "google_compute_backend_service" "default" {
   name                  = "pos-api-backend-service"
-  load_balancing_scheme = "EXTERNAL"
+  load_balancing_scheme = "EXTERNAL_MANAGED"
 
   backend {
     group = google_compute_region_network_endpoint_group.neg.id
   }
-}
-
-resource "google_compute_url_map" "urlmap" {
-  name            = "pos-url-map"
-  default_service = google_compute_backend_service.default.name
 }
 
 resource "google_compute_target_https_proxy" "default" {
@@ -44,8 +39,9 @@ resource "google_compute_target_https_proxy" "default" {
 }
 
 resource "google_compute_global_forwarding_rule" "default" {
-  name       = "pos-https-rule"
-  target     = google_compute_target_https_proxy.default.self_link
-  port_range = "443"
-  ip_address = var.ip_address
+  name                  = "pos-https-rule"
+  load_balancing_scheme = "EXTERNAL_MANAGED"
+  target                = google_compute_target_https_proxy.default.self_link
+  port_range            = "443"
+  ip_address            = var.ip_address
 }
