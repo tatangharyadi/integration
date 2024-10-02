@@ -137,7 +137,7 @@ func (h Handler) GetCustomer(w http.ResponseWriter, r *http.Request) {
 }
 
 func ImportCustomer(h Handler, customer models.Customer,
-	ch chan<- []byte, wg *sync.WaitGroup) interface{} {
+	ch chan<- models.Customer, wg *sync.WaitGroup) interface{} {
 	h.Logger.Info().Msgf("Importing customer %s", customer.Id)
 	defer wg.Done()
 
@@ -168,8 +168,14 @@ func ImportCustomer(h Handler, customer models.Customer,
 	if err != nil {
 		return err
 	}
+	var VoucherifyCustomer VoucherifyCustomer
+	if err := json.Unmarshal(body, &VoucherifyCustomer); err != nil {
+		return err
+	}
 
-	ch <- body
+	customer = MapCustomer(VoucherifyCustomer)
+
+	ch <- customer
 
 	return nil
 }
@@ -181,7 +187,7 @@ func (h Handler) ImportCustomers(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ch := make(chan []byte)
+	ch := make(chan models.Customer)
 	var wg sync.WaitGroup
 
 	for _, customer := range customers.Customers {
@@ -194,17 +200,13 @@ func (h Handler) ImportCustomers(w http.ResponseWriter, r *http.Request) {
 		close(ch)
 	}()
 
-	var vaucherifyCustomers []VoucherifyCustomer
+	resCustomers := []models.Customer{}
 	for result := range ch {
-		var voucherifyCustomer VoucherifyCustomer
-		if err := json.Unmarshal(result, &voucherifyCustomer); err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		vaucherifyCustomers = append(vaucherifyCustomers, voucherifyCustomer)
+
+		resCustomers = append(resCustomers, result)
 	}
 
-	resJson, err := json.Marshal(vaucherifyCustomers)
+	resJson, err := json.Marshal(resCustomers)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
