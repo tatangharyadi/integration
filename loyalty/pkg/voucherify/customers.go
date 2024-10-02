@@ -35,7 +35,7 @@ type VoucherifyCustomer struct {
 	Metadata VoucherifyMetadata `json:"metadata"`
 }
 
-func MapCustomer(customer VoucherifyCustomer) models.Customer {
+func mapCustomer(customer VoucherifyCustomer) models.Customer {
 	return models.Customer{
 		Id:         customer.SourceId,
 		EmployeeId: customer.Metadata.EmployeeId,
@@ -43,27 +43,30 @@ func MapCustomer(customer VoucherifyCustomer) models.Customer {
 		Email:      customer.Email,
 		Phone:      customer.Phone,
 		MealBenefit: models.Credit{
-			Cycle:                customer.Metadata.CreditBenefit.Cycle,
-			Limit:                customer.Metadata.CreditBenefit.Limit,
-			Balance:              customer.Metadata.CreditBenefit.Balance,
-			TransactionTimestamp: customer.Metadata.CreditBenefit.LastTransactionDate,
+			Cycle:                customer.Metadata.MealBenefit.Cycle,
+			Limit:                customer.Metadata.MealBenefit.Limit,
+			Balance:              customer.Metadata.MealBenefit.Balance,
+			TransactionTimestamp: customer.Metadata.MealBenefit.LastTransactionDate,
+			AvailableBalance:     getBalance(customer.Metadata.MealBenefit),
 		},
 		CreditBenefit: models.Credit{
 			Cycle:                customer.Metadata.CreditBenefit.Cycle,
 			Limit:                customer.Metadata.CreditBenefit.Limit,
 			Balance:              customer.Metadata.CreditBenefit.Balance,
 			TransactionTimestamp: customer.Metadata.CreditBenefit.LastTransactionDate,
+			AvailableBalance:     getBalance(customer.Metadata.CreditBenefit),
 		},
 		PersonalCredit: models.Credit{
 			Cycle:                customer.Metadata.PersonalCredit.Cycle,
 			Limit:                customer.Metadata.PersonalCredit.Limit,
 			Balance:              customer.Metadata.PersonalCredit.Balance,
 			TransactionTimestamp: customer.Metadata.PersonalCredit.LastTransactionDate,
+			AvailableBalance:     getBalance(customer.Metadata.PersonalCredit),
 		},
 	}
 }
 
-func MapVoucherify(customer models.Customer) VoucherifyCustomer {
+func mapVoucherify(customer models.Customer) VoucherifyCustomer {
 	return VoucherifyCustomer{
 		SourceId: customer.Id,
 		Name:     customer.Name,
@@ -75,32 +78,30 @@ func MapVoucherify(customer models.Customer) VoucherifyCustomer {
 				Cycle:               customer.MealBenefit.Cycle,
 				Limit:               customer.MealBenefit.Limit,
 				Balance:             customer.MealBenefit.Balance,
-				LastTransactionDate: time.Now().Format("2006-01-02T15:04:05.000Z"),
+				LastTransactionDate: customer.MealBenefit.TransactionTimestamp,
 			},
 			CreditBenefit: VoucherifyCredit{
 				Cycle:               customer.CreditBenefit.Cycle,
 				Limit:               customer.CreditBenefit.Limit,
 				Balance:             customer.CreditBenefit.Balance,
-				LastTransactionDate: time.Now().Format("2006-01-02T15:04:05.000Z"),
+				LastTransactionDate: customer.CreditBenefit.TransactionTimestamp,
 			},
 			PersonalCredit: VoucherifyCredit{
 				Cycle:               customer.PersonalCredit.Cycle,
 				Limit:               customer.PersonalCredit.Limit,
 				Balance:             customer.PersonalCredit.Balance,
-				LastTransactionDate: time.Now().Format("2006-01-02T15:04:05.000Z"),
+				LastTransactionDate: customer.PersonalCredit.TransactionTimestamp,
 			},
 		},
 	}
 }
 
-func (h Handler) GetCustomer(w http.ResponseWriter, r *http.Request) {
-	id := chi.URLParam(r, "id")
+func getCustomer(h Handler, id string) (models.Customer, error) {
 	url := fmt.Sprintf("%s/customers/%s", h.Env.LoyaltyUrl, id)
 	client := &http.Client{}
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		return models.Customer{}, err
 	}
 
 	req.Header.Set("X-App-Id", h.Env.VoucherifyId)
@@ -108,24 +109,33 @@ func (h Handler) GetCustomer(w http.ResponseWriter, r *http.Request) {
 
 	resp, err := client.Do(req)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		return models.Customer{}, err
 	}
 	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		return models.Customer{}, err
 	}
 
 	var VoucherifyCustomer VoucherifyCustomer
 	if err := json.Unmarshal(body, &VoucherifyCustomer); err != nil {
+		return models.Customer{}, err
+	}
+
+	customer := mapCustomer(VoucherifyCustomer)
+
+	return customer, nil
+}
+
+func (h Handler) GetCustomer(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+	customer, err := getCustomer(h, id)
+	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	customer := MapCustomer(VoucherifyCustomer)
 	resJson, err := json.Marshal(customer)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -136,14 +146,18 @@ func (h Handler) GetCustomer(w http.ResponseWriter, r *http.Request) {
 	w.Write(resJson)
 }
 
-func ImportCustomer(h Handler, customer models.Customer,
+func importCustomer(h Handler, customer models.Customer,
 	ch chan<- models.Customer, wg *sync.WaitGroup) interface{} {
 	h.Logger.Info().Msgf("Importing customer %s", customer.Id)
 	defer wg.Done()
 
 	url := fmt.Sprintf("%s/customers", h.Env.LoyaltyUrl)
 	client := &http.Client{}
-	voucherifyCustomer := MapVoucherify(customer)
+	customer.MealBenefit.TransactionTimestamp = time.Now().UTC().Format("2006-01-02T15:04:05.000Z")
+	customer.CreditBenefit.TransactionTimestamp = time.Now().UTC().Format("2006-01-02T15:04:05.000Z")
+	customer.PersonalCredit.TransactionTimestamp = time.Now().UTC().Format("2006-01-02T15:04:05.000Z")
+	voucherifyCustomer := mapVoucherify(customer)
+
 	customerBytes, err := json.Marshal(voucherifyCustomer)
 	if err != nil {
 		return err
@@ -173,7 +187,7 @@ func ImportCustomer(h Handler, customer models.Customer,
 		return err
 	}
 
-	customer = MapCustomer(VoucherifyCustomer)
+	customer = mapCustomer(VoucherifyCustomer)
 
 	ch <- customer
 
@@ -192,7 +206,7 @@ func (h Handler) ImportCustomers(w http.ResponseWriter, r *http.Request) {
 
 	for _, customer := range customers.Customers {
 		wg.Add(1)
-		go ImportCustomer(h, customer, ch, &wg)
+		go importCustomer(h, customer, ch, &wg)
 	}
 
 	go func() {

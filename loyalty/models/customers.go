@@ -5,6 +5,7 @@ type Credit struct {
 	Limit                float64 `json:"limit"`
 	Balance              float64 `json:"balance"`
 	TransactionTimestamp string  `json:"transaction_timestamp"`
+	AvailableBalance     float64 `json:"available_balance"`
 }
 
 type Customer struct {
