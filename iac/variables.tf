@@ -10,7 +10,7 @@ variable "region" {
 
 variable "ssl_certificates" {
   type    = list(string)
-  default = ["unilever-yummycorp-com-cert"]
+  default = ["unilever-yummycorp-com-cert", "posunilever-yummycorp-com-cert"]
 }
 
 variable "ip_address" {

@@ -3,7 +3,7 @@ resource "google_compute_url_map" "urlmap" {
   default_service = google_compute_backend_service.default.name
 
   host_rule {
-    hosts        = ["unilever.yummycorp.com"]
+    hosts        = ["unilever.yummycorp.com", "posunilever.yummycorp.com"]
     path_matcher = "pos-matcher"
   }
 
