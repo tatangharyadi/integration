@@ -560,7 +560,7 @@ definitions:
       id:
         type: "string"
         example: "GPAS-123"
-      company_id:
+      employee_id:
         type: "string"
         example: "123"
       name:
@@ -574,7 +574,7 @@ definitions:
         example: "+62123"
       meal_benefit:
         $ref: "#/definitions/Credit"
-      company_benefit:
+      credit_benefit:
         $ref: "#/definitions/Credit"
       personal_credit:
         $ref: "#/definitions/Credit"

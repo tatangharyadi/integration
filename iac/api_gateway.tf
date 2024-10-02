@@ -8,8 +8,8 @@ resource "google_api_gateway_api_config" "api_gw" {
   provider = google-beta
   project  = var.project_id
 
-  api           = google_api_gateway_api.api_gw.api_id
-  api_config_id = "pos-config"
+  api                  = google_api_gateway_api.api_gw.api_id
+  api_config_id_prefix = "pos-config"
 
   openapi_documents {
     document {
