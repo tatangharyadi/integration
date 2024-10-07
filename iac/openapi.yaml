@@ -365,7 +365,70 @@ paths:
             type: "array"
             items:
               $ref: "#/definitions/Customer"
-          
+  /voucherify/creditcustomer/{id}:
+    post:
+      tags:
+        - "voucherify"
+      summary: "Credit customer"
+      operationId: "creditCustomer"
+      x-google-backend:
+        address: https://integration-loyalty-238488984298.asia-southeast2.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+      security:
+        - api_key: []
+      produces:
+        - "application/json"
+      parameters:
+        - name: "id"
+          in: "path"
+          description: "Id of customer to credit"
+          required: true
+          type: "string"
+        - name: "body"
+          in: "body"
+          description: "DebitCredit objects"
+          required: true
+          schema:
+            $ref: "#/definitions/DebitCredit"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Customer"
+  /voucherify/debitcustomer/{id}:
+    post:
+      tags:
+        - "voucherify"
+      summary: "Debit customer"
+      operationId: "debitCustomer"
+      x-google-backend:
+        address: https://integration-loyalty-238488984298.asia-southeast2.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+      security:
+        - api_key: []
+      produces:
+        - "application/json"
+      parameters:
+        - name: "id"
+          in: "path"
+          description: "Id of customer to debit"
+          required: true
+          type: "string"
+        - name: "body"
+          in: "body"
+          description: "DebitCredit objects"
+          required: true
+          schema:
+            $ref: "#/definitions/DebitCredit"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Customer"          
   
 
 securityDefinitions:
@@ -593,6 +656,15 @@ definitions:
       transaction_timestamp:
         type: "string"
         format: "date-time"
+  DebitCredit:
+    type: "object"
+    properties:
+      type:
+        type: "string"
+        example: "CREDITBENEFIT"
+      amount:
+        type: "number"
+        format: "float"
         
   QrPayment:
     type: "object"
