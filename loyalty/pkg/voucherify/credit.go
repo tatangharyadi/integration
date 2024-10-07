@@ -17,33 +17,6 @@ type TransactionRequest struct {
 	Amount float64 `json:"amount"`
 }
 
-type VoucherifyMealBenefitMetadata struct {
-	CreditBenefit VoucherifyCredit `json:"meal_benefit"`
-}
-
-type VoucherifyCreditBenefitMetadata struct {
-	CreditBenefit VoucherifyCredit `json:"credit_benefit"`
-}
-
-type VoucherifyPersonalCreditMetadata struct {
-	CreditBenefit VoucherifyCredit `json:"personal_credit"`
-}
-
-type VoucherifyMealBenefitTransaction struct {
-	SourceId string                        `json:"source_id"`
-	Metadata VoucherifyMealBenefitMetadata `json:"metadata"`
-}
-
-type VoucherifyCreditBenefitTransaction struct {
-	SourceId string                          `json:"source_id"`
-	Metadata VoucherifyCreditBenefitMetadata `json:"metadata"`
-}
-
-type VoucherifyPersonalCreditTransaction struct {
-	SourceId string                           `json:"source_id"`
-	Metadata VoucherifyPersonalCreditMetadata `json:"metadata"`
-}
-
 func getBalance(credit VoucherifyCredit) float64 {
 	today := time.Now().UTC()
 	t, err := time.Parse("2006-01-02T15:04:05.000Z", credit.LastTransactionDate)
@@ -93,6 +66,21 @@ func updateBalance(h Handler, payload []byte) (models.Customer, error) {
 	return customer, nil
 }
 
+func creditVoucherify(credit models.Credit, amount float64) (*VoucherifyCredit, bool) {
+	remainBalance := credit.AvailableBalance - amount
+	if remainBalance < 0 {
+		return &VoucherifyCredit{}, false
+	}
+	var timestamp = time.Now().UTC().Format("2006-01-02T15:04:05.000Z")
+
+	return &VoucherifyCredit{
+		Cycle:               credit.Cycle,
+		Limit:               credit.Limit,
+		Balance:             remainBalance,
+		LastTransactionDate: timestamp,
+	}, true
+}
+
 func (h Handler) CreditCustomer(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	var transaction TransactionRequest
@@ -105,63 +93,36 @@ func (h Handler) CreditCustomer(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	var payload []byte
+
+	var creditTransaction VoucherifyCustomer
+	var valid bool
+	creditTransaction.SourceId = customer.Id
 	switch transaction.Type {
 	case "MEALBENEFIT":
-		if transaction.Amount > customer.MealBenefit.AvailableBalance {
+		creditTransaction.Metadata.MealBenefit, valid = creditVoucherify(customer.MealBenefit, transaction.Amount)
+		if !valid {
 			http.Error(w, "Insufficient balance", http.StatusBadRequest)
-			return
-		}
-
-		var creditTransaction VoucherifyMealBenefitTransaction
-		creditTransaction.SourceId = customer.Id
-		creditTransaction.Metadata.CreditBenefit.Cycle = customer.MealBenefit.Cycle
-		creditTransaction.Metadata.CreditBenefit.Limit = customer.MealBenefit.Limit
-		creditTransaction.Metadata.CreditBenefit.Balance = customer.MealBenefit.Balance - transaction.Amount
-		creditTransaction.Metadata.CreditBenefit.LastTransactionDate = time.Now().UTC().Format("2006-01-02T15:04:05.000Z")
-
-		payload, err = json.Marshal(creditTransaction)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 	case "CREDITBENEFIT":
-		if transaction.Amount > customer.CreditBenefit.AvailableBalance {
+		creditTransaction.Metadata.CreditBenefit, valid = creditVoucherify(customer.CreditBenefit, transaction.Amount)
+		if !valid {
 			http.Error(w, "Insufficient balance", http.StatusBadRequest)
 			return
 		}
-
-		var creditTransaction VoucherifyCreditBenefitTransaction
-		creditTransaction.SourceId = customer.Id
-		creditTransaction.Metadata.CreditBenefit.Cycle = customer.CreditBenefit.Cycle
-		creditTransaction.Metadata.CreditBenefit.Limit = customer.CreditBenefit.Limit
-		creditTransaction.Metadata.CreditBenefit.Balance = customer.CreditBenefit.Balance - transaction.Amount
-		creditTransaction.Metadata.CreditBenefit.LastTransactionDate = time.Now().UTC().Format("2006-01-02T15:04:05.000Z")
-
-		payload, err = json.Marshal(creditTransaction)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
 	case "PERSONALCREDIT":
-		if transaction.Amount > customer.PersonalCredit.AvailableBalance {
+		creditTransaction.Metadata.PersonalCredit, valid = creditVoucherify(customer.PersonalCredit, transaction.Amount)
+		if !valid {
 			http.Error(w, "Insufficient balance", http.StatusBadRequest)
 			return
 		}
+	}
 
-		var creditTransaction VoucherifyPersonalCreditTransaction
-		creditTransaction.SourceId = customer.Id
-		creditTransaction.Metadata.CreditBenefit.Cycle = customer.PersonalCredit.Cycle
-		creditTransaction.Metadata.CreditBenefit.Limit = customer.PersonalCredit.Limit
-		creditTransaction.Metadata.CreditBenefit.Balance = customer.PersonalCredit.Balance - transaction.Amount
-		creditTransaction.Metadata.CreditBenefit.LastTransactionDate = time.Now().UTC().Format("2006-01-02T15:04:05.000Z")
-
-		payload, err = json.Marshal(creditTransaction)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
+	var payload []byte
+	payload, err = json.Marshal(creditTransaction)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
 	customer, err = updateBalance(h, payload)
@@ -180,6 +141,61 @@ func (h Handler) CreditCustomer(w http.ResponseWriter, r *http.Request) {
 	w.Write(resJson)
 }
 
-func DebitCustomer() {
+func debitVoucherify(credit models.Credit, amount float64) *VoucherifyCredit {
+	remainBalance := credit.AvailableBalance + amount
+	var timestamp = time.Now().UTC().Format("2006-01-02T15:04:05.000Z")
 
+	return &VoucherifyCredit{
+		Cycle:               credit.Cycle,
+		Limit:               credit.Limit,
+		Balance:             remainBalance,
+		LastTransactionDate: timestamp,
+	}
+}
+
+func (h Handler) DebitCustomer(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+	var transaction TransactionRequest
+	if err := json.NewDecoder(r.Body).Decode(&transaction); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	customer, err := getCustomer(h, id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	var debitTransaction VoucherifyCustomer
+	debitTransaction.SourceId = customer.Id
+	switch transaction.Type {
+	case "MEALBENEFIT":
+		debitTransaction.Metadata.MealBenefit = debitVoucherify(customer.MealBenefit, transaction.Amount)
+	case "CREDITBENEFIT":
+		debitTransaction.Metadata.CreditBenefit = debitVoucherify(customer.CreditBenefit, transaction.Amount)
+	case "PERSONALCREDIT":
+		debitTransaction.Metadata.PersonalCredit = debitVoucherify(customer.PersonalCredit, transaction.Amount)
+	}
+
+	var payload []byte
+	payload, err = json.Marshal(debitTransaction)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	customer, err = updateBalance(h, payload)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	resJson, err := json.Marshal(customer)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(resJson)
 }

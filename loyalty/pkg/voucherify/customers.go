@@ -14,24 +14,24 @@ import (
 )
 
 type VoucherifyCredit struct {
-	Cycle               string  `json:"cycle"`
-	Limit               float64 `json:"limit"`
-	Balance             float64 `json:"balance"`
-	LastTransactionDate string  `json:"last_transaction_date"`
+	Cycle               string  `json:"cycle,omitempty"`
+	Limit               float64 `json:"limit,omitempty"`
+	Balance             float64 `json:"balance,omitempty"`
+	LastTransactionDate string  `json:"last_transaction_date,omitempty"`
 }
 
 type VoucherifyMetadata struct {
-	EmployeeId     string           `json:"employee_id"`
-	MealBenefit    VoucherifyCredit `json:"meal_benefit"`
-	CreditBenefit  VoucherifyCredit `json:"credit_benefit"`
-	PersonalCredit VoucherifyCredit `json:"personal_credit"`
+	EmployeeId     string            `json:"employee_id,omitempty"`
+	MealBenefit    *VoucherifyCredit `json:"meal_benefit,omitempty"`
+	CreditBenefit  *VoucherifyCredit `json:"credit_benefit,omitempty"`
+	PersonalCredit *VoucherifyCredit `json:"personal_credit,omitempty"`
 }
 
 type VoucherifyCustomer struct {
 	SourceId string             `json:"source_id"`
-	Name     string             `json:"name"`
-	Email    string             `json:"email"`
-	Phone    string             `json:"phone"`
+	Name     string             `json:"name,omitempty"`
+	Email    string             `json:"email,omitempty"`
+	Phone    string             `json:"phone,omitempty"`
 	Metadata VoucherifyMetadata `json:"metadata"`
 }
 
@@ -47,21 +47,21 @@ func mapCustomer(customer VoucherifyCustomer) models.Customer {
 			Limit:                customer.Metadata.MealBenefit.Limit,
 			Balance:              customer.Metadata.MealBenefit.Balance,
 			TransactionTimestamp: customer.Metadata.MealBenefit.LastTransactionDate,
-			AvailableBalance:     getBalance(customer.Metadata.MealBenefit),
+			AvailableBalance:     getBalance(*customer.Metadata.MealBenefit),
 		},
 		CreditBenefit: models.Credit{
 			Cycle:                customer.Metadata.CreditBenefit.Cycle,
 			Limit:                customer.Metadata.CreditBenefit.Limit,
 			Balance:              customer.Metadata.CreditBenefit.Balance,
 			TransactionTimestamp: customer.Metadata.CreditBenefit.LastTransactionDate,
-			AvailableBalance:     getBalance(customer.Metadata.CreditBenefit),
+			AvailableBalance:     getBalance(*customer.Metadata.CreditBenefit),
 		},
 		PersonalCredit: models.Credit{
 			Cycle:                customer.Metadata.PersonalCredit.Cycle,
 			Limit:                customer.Metadata.PersonalCredit.Limit,
 			Balance:              customer.Metadata.PersonalCredit.Balance,
 			TransactionTimestamp: customer.Metadata.PersonalCredit.LastTransactionDate,
-			AvailableBalance:     getBalance(customer.Metadata.PersonalCredit),
+			AvailableBalance:     getBalance(*customer.Metadata.PersonalCredit),
 		},
 	}
 }
@@ -74,19 +74,19 @@ func mapVoucherify(customer models.Customer) VoucherifyCustomer {
 		Phone:    customer.Phone,
 		Metadata: VoucherifyMetadata{
 			EmployeeId: customer.EmployeeId,
-			MealBenefit: VoucherifyCredit{
+			MealBenefit: &VoucherifyCredit{
 				Cycle:               customer.MealBenefit.Cycle,
 				Limit:               customer.MealBenefit.Limit,
 				Balance:             customer.MealBenefit.Balance,
 				LastTransactionDate: customer.MealBenefit.TransactionTimestamp,
 			},
-			CreditBenefit: VoucherifyCredit{
+			CreditBenefit: &VoucherifyCredit{
 				Cycle:               customer.CreditBenefit.Cycle,
 				Limit:               customer.CreditBenefit.Limit,
 				Balance:             customer.CreditBenefit.Balance,
 				LastTransactionDate: customer.CreditBenefit.TransactionTimestamp,
 			},
-			PersonalCredit: VoucherifyCredit{
+			PersonalCredit: &VoucherifyCredit{
 				Cycle:               customer.PersonalCredit.Cycle,
 				Limit:               customer.PersonalCredit.Limit,
 				Balance:             customer.PersonalCredit.Balance,
