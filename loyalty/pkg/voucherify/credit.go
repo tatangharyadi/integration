@@ -10,6 +10,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/tatangharyadi/integration/loyalty/models"
+	voucherify "github.com/tatangharyadi/integration/loyalty/pkg/voucherify/models"
 )
 
 type TransactionRequest struct {
@@ -17,7 +18,7 @@ type TransactionRequest struct {
 	Amount float64 `json:"amount"`
 }
 
-func getBalance(credit VoucherifyCredit) float64 {
+func getBalance(credit voucherify.Credit) float64 {
 	today := time.Now().UTC()
 	t, err := time.Parse("2006-01-02T15:04:05.000Z", credit.LastTransactionDate)
 	if err != nil {
@@ -56,7 +57,7 @@ func updateBalance(h Handler, payload []byte) (models.Customer, error) {
 		return models.Customer{}, err
 	}
 
-	var VoucherifyCustomer VoucherifyCustomer
+	var VoucherifyCustomer voucherify.Customer
 	if err := json.Unmarshal(body, &VoucherifyCustomer); err != nil {
 		return models.Customer{}, err
 	}
@@ -66,14 +67,14 @@ func updateBalance(h Handler, payload []byte) (models.Customer, error) {
 	return customer, nil
 }
 
-func creditVoucherify(credit models.Credit, amount float64) (*VoucherifyCredit, bool) {
+func creditVoucherify(credit models.Credit, amount float64) (*voucherify.Credit, bool) {
 	remainBalance := credit.AvailableBalance - amount
 	if remainBalance < 0 {
-		return &VoucherifyCredit{}, false
+		return &voucherify.Credit{}, false
 	}
 	var timestamp = time.Now().UTC().Format("2006-01-02T15:04:05.000Z")
 
-	return &VoucherifyCredit{
+	return &voucherify.Credit{
 		Cycle:               credit.Cycle,
 		Limit:               credit.Limit,
 		Balance:             remainBalance,
@@ -94,7 +95,7 @@ func (h Handler) CreditCustomer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var creditTransaction VoucherifyCustomer
+	var creditTransaction voucherify.Customer
 	var valid bool
 	creditTransaction.SourceId = customer.Id
 	switch transaction.Type {
@@ -141,11 +142,11 @@ func (h Handler) CreditCustomer(w http.ResponseWriter, r *http.Request) {
 	w.Write(resJson)
 }
 
-func debitVoucherify(credit models.Credit, amount float64) *VoucherifyCredit {
+func debitVoucherify(credit models.Credit, amount float64) *voucherify.Credit {
 	remainBalance := credit.AvailableBalance + amount
 	var timestamp = time.Now().UTC().Format("2006-01-02T15:04:05.000Z")
 
-	return &VoucherifyCredit{
+	return &voucherify.Credit{
 		Cycle:               credit.Cycle,
 		Limit:               credit.Limit,
 		Balance:             remainBalance,
@@ -166,7 +167,7 @@ func (h Handler) DebitCustomer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var debitTransaction VoucherifyCustomer
+	var debitTransaction voucherify.Customer
 	debitTransaction.SourceId = customer.Id
 	switch transaction.Type {
 	case "MEALBENEFIT":

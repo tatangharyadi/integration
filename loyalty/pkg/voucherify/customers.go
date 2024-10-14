@@ -8,31 +8,10 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/tatangharyadi/integration/loyalty/models"
+	voucherify "github.com/tatangharyadi/integration/loyalty/pkg/voucherify/models"
 )
 
-type VoucherifyCredit struct {
-	Cycle               string  `json:"cycle,omitempty"`
-	Limit               float64 `json:"limit,omitempty"`
-	Balance             float64 `json:"balance,omitempty"`
-	LastTransactionDate string  `json:"last_transaction_date,omitempty"`
-}
-
-type VoucherifyMetadata struct {
-	EmployeeId     string            `json:"employee_id,omitempty"`
-	MealBenefit    *VoucherifyCredit `json:"meal_benefit,omitempty"`
-	CreditBenefit  *VoucherifyCredit `json:"credit_benefit,omitempty"`
-	PersonalCredit *VoucherifyCredit `json:"personal_credit,omitempty"`
-}
-
-type VoucherifyCustomer struct {
-	SourceId string             `json:"source_id"`
-	Name     string             `json:"name,omitempty"`
-	Email    string             `json:"email,omitempty"`
-	Phone    string             `json:"phone,omitempty"`
-	Metadata VoucherifyMetadata `json:"metadata"`
-}
-
-func mapCustomer(customer VoucherifyCustomer) models.Customer {
+func mapCustomer(customer voucherify.Customer) models.Customer {
 	return models.Customer{
 		Id:         customer.SourceId,
 		EmployeeId: customer.Metadata.EmployeeId,
@@ -63,27 +42,27 @@ func mapCustomer(customer VoucherifyCustomer) models.Customer {
 	}
 }
 
-func mapVoucherify(customer models.Customer) VoucherifyCustomer {
-	return VoucherifyCustomer{
+func mapVoucherify(customer models.Customer) voucherify.Customer {
+	return voucherify.Customer{
 		SourceId: customer.Id,
 		Name:     customer.Name,
 		Email:    customer.Email,
 		Phone:    customer.Phone,
-		Metadata: VoucherifyMetadata{
+		Metadata: voucherify.Metadata{
 			EmployeeId: customer.EmployeeId,
-			MealBenefit: &VoucherifyCredit{
+			MealBenefit: &voucherify.Credit{
 				Cycle:               customer.MealBenefit.Cycle,
 				Limit:               customer.MealBenefit.Limit,
 				Balance:             customer.MealBenefit.Balance,
 				LastTransactionDate: customer.MealBenefit.TransactionTimestamp,
 			},
-			CreditBenefit: &VoucherifyCredit{
+			CreditBenefit: &voucherify.Credit{
 				Cycle:               customer.CreditBenefit.Cycle,
 				Limit:               customer.CreditBenefit.Limit,
 				Balance:             customer.CreditBenefit.Balance,
 				LastTransactionDate: customer.CreditBenefit.TransactionTimestamp,
 			},
-			PersonalCredit: &VoucherifyCredit{
+			PersonalCredit: &voucherify.Credit{
 				Cycle:               customer.PersonalCredit.Cycle,
 				Limit:               customer.PersonalCredit.Limit,
 				Balance:             customer.PersonalCredit.Balance,
@@ -115,7 +94,7 @@ func getCustomer(h Handler, id string) (models.Customer, error) {
 		return models.Customer{}, err
 	}
 
-	var VoucherifyCustomer VoucherifyCustomer
+	var VoucherifyCustomer voucherify.Customer
 	if err := json.Unmarshal(body, &VoucherifyCustomer); err != nil {
 		return models.Customer{}, err
 	}
@@ -133,6 +112,8 @@ func (h Handler) GetCustomer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	customer.Vouchers, _ = getVouchers(h, customer.Id)
+
 	resJson, err := json.Marshal(customer)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -144,14 +125,14 @@ func (h Handler) GetCustomer(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h Handler) ImportCustomers(w http.ResponseWriter, r *http.Request) {
-	var customers models.Customers
+	var customers []models.Customer
 	if err := json.NewDecoder(r.Body).Decode(&customers); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	tasks := make([]Task, len(customers.Customers))
-	for i, customer := range customers.Customers {
+	tasks := make([]Task, len(customers))
+	for i, customer := range customers {
 		tasks[i] = Task{
 			handler:  h,
 			customer: customer,

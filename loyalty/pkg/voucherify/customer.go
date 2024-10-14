@@ -100,7 +100,7 @@ func importCustomer(h Handler, customer models.Customer) (models.Customer, error
 	if err != nil {
 		return models.Customer{}, err
 	}
-	var VoucherifyCustomer VoucherifyCustomer
+	var VoucherifyCustomer voucherify.Customer
 	if err := json.Unmarshal(body, &VoucherifyCustomer); err != nil {
 		return models.Customer{}, err
 	}
@@ -115,11 +115,11 @@ func createVoucher(h Handler, customer models.Customer) (voucherify.Voucher, err
 	url := fmt.Sprintf("%s/vouchers/%s", h.Env.LoyaltyUrl, voucherCode)
 	client := &http.Client{}
 	voucherifyVoucher := voucherify.Voucher{
-		Category:    "MEAL_BENEFIT",
-		VoucherType: "DISCOUNT_VOUCHER",
+		Category: "MEAL_BENEFIT",
+		Type:     "DISCOUNT_VOUCHER",
 		Discount: voucherify.VoucherDiscount{
-			DiscountType: "PERCENT",
-			PercentOff:   100,
+			Type:       "PERCENT",
+			PercentOff: 100,
 		},
 		ValidationRules: []string{
 			"val_5GTal44soXkP",
