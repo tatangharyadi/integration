@@ -1,13 +1,10 @@
 package voucherify
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
-	"sync"
-	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/tatangharyadi/integration/loyalty/models"
@@ -146,54 +143,6 @@ func (h Handler) GetCustomer(w http.ResponseWriter, r *http.Request) {
 	w.Write(resJson)
 }
 
-func importCustomer(h Handler, customer models.Customer,
-	ch chan<- models.Customer, wg *sync.WaitGroup) interface{} {
-	h.Logger.Info().Msgf("Importing customer %s", customer.Id)
-	defer wg.Done()
-
-	url := fmt.Sprintf("%s/customers", h.Env.LoyaltyUrl)
-	client := &http.Client{}
-	customer.MealBenefit.TransactionTimestamp = time.Now().UTC().Format("2006-01-02T15:04:05.000Z")
-	customer.CreditBenefit.TransactionTimestamp = time.Now().UTC().Format("2006-01-02T15:04:05.000Z")
-	customer.PersonalCredit.TransactionTimestamp = time.Now().UTC().Format("2006-01-02T15:04:05.000Z")
-	voucherifyCustomer := mapVoucherify(customer)
-
-	customerBytes, err := json.Marshal(voucherifyCustomer)
-	if err != nil {
-		return err
-	}
-
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(customerBytes))
-	if err != nil {
-		return err
-	}
-
-	req.Header.Set("X-App-Id", h.Env.VoucherifyId)
-	req.Header.Set("X-App-Token", h.Env.VoucherifySecretKey)
-	req.Header.Set("Content-Type", "application/json")
-
-	resp, err := client.Do(req)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return err
-	}
-	var VoucherifyCustomer VoucherifyCustomer
-	if err := json.Unmarshal(body, &VoucherifyCustomer); err != nil {
-		return err
-	}
-
-	customer = mapCustomer(VoucherifyCustomer)
-
-	ch <- customer
-
-	return nil
-}
-
 func (h Handler) ImportCustomers(w http.ResponseWriter, r *http.Request) {
 	var customers models.Customers
 	if err := json.NewDecoder(r.Body).Decode(&customers); err != nil {
@@ -201,31 +150,20 @@ func (h Handler) ImportCustomers(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ch := make(chan models.Customer)
-	var wg sync.WaitGroup
-
-	for _, customer := range customers.Customers {
-		wg.Add(1)
-		go importCustomer(h, customer, ch, &wg)
+	tasks := make([]Task, len(customers.Customers))
+	for i, customer := range customers.Customers {
+		tasks[i] = Task{
+			handler:  h,
+			customer: customer,
+		}
 	}
 
-	go func() {
-		wg.Wait()
-		close(ch)
-	}()
-
-	resCustomers := []models.Customer{}
-	for result := range ch {
-
-		resCustomers = append(resCustomers, result)
+	wp := WorkerPool{
+		Tasks:       tasks,
+		concurrency: 5,
 	}
+	wp.Run()
 
-	resJson, err := json.Marshal(resCustomers)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	w.Write(resJson)
 }
