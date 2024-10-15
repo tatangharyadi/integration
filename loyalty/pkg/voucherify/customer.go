@@ -117,13 +117,14 @@ func createVoucher(h Handler, customer models.Customer) (voucherify.Voucher, err
 	voucherifyVoucher := voucherify.Voucher{
 		Category: "MEAL_BENEFIT",
 		Type:     "DISCOUNT_VOUCHER",
-		Discount: voucherify.VoucherDiscount{
+		Discount: &voucherify.VoucherDiscount{
 			Type:       "PERCENT",
 			PercentOff: 100,
 		},
 		ValidationRules: []string{
 			"val_5GTal44soXkP",
 		},
+		Active: true,
 	}
 
 	voucherBytes, err := json.Marshal(voucherifyVoucher)
@@ -164,7 +165,7 @@ func publishVoucher(h Handler, voucherCode, customerId string) error {
 
 	voucherifyPublication := voucherify.VoucherPublication{
 		Voucher: voucherCode,
-		Customer: voucherify.VoucherCustomer{
+		Customer: voucherify.Customer{
 			SourceId: customerId,
 		},
 	}

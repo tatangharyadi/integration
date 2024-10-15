@@ -43,6 +43,7 @@ func getVouchers(h Handler, id string) ([]models.Voucher, error) {
 
 	req.Header.Set("X-App-Id", h.Env.VoucherifyId)
 	req.Header.Set("X-App-Token", h.Env.VoucherifySecretKey)
+	req.Header.Set("Content-Type", "application/json")
 
 	resp, err := client.Do(req)
 	if err != nil {

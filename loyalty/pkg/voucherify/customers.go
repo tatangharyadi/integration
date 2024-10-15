@@ -82,6 +82,7 @@ func getCustomer(h Handler, id string) (models.Customer, error) {
 
 	req.Header.Set("X-App-Id", h.Env.VoucherifyId)
 	req.Header.Set("X-App-Token", h.Env.VoucherifySecretKey)
+	req.Header.Set("Content-Type", "application/json")
 
 	resp, err := client.Do(req)
 	if err != nil {
@@ -121,18 +122,19 @@ func (h Handler) GetCustomer(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
 	w.Write(resJson)
 }
 
 func (h Handler) ImportCustomers(w http.ResponseWriter, r *http.Request) {
-	var customers []models.Customer
+	var customers models.Customers
 	if err := json.NewDecoder(r.Body).Decode(&customers); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	tasks := make([]Task, len(customers))
-	for i, customer := range customers {
+	tasks := make([]Task, len(customers.Customers))
+	for i, customer := range customers.Customers {
 		tasks[i] = Task{
 			handler:  h,
 			customer: customer,

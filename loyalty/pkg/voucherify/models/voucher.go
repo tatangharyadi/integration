@@ -6,22 +6,18 @@ type VoucherDiscount struct {
 }
 
 type Voucher struct {
-	Id              string          `json:"id,omitempty"`
-	Code            string          `json:"code,omitempty"`
-	Category        string          `json:"category"`
-	Type            string          `json:"type"`
-	Discount        VoucherDiscount `json:"discount"`
-	ValidationRules []string        `json:"validation_rules"`
-	Active          bool            `json:"active"`
-}
-
-type VoucherCustomer struct {
-	SourceId string `json:"source_id"`
+	Id              string           `json:"id,omitempty"`
+	Code            string           `json:"code,omitempty"`
+	Category        string           `json:"category,omitempty"`
+	Type            string           `json:"type,omitempty"`
+	Discount        *VoucherDiscount `json:"discount"`
+	ValidationRules []string         `json:"validation_rules"`
+	Active          bool             `json:"active,omitempty"`
 }
 
 type VoucherPublication struct {
-	Voucher  string          `json:"voucher"`
-	Customer VoucherCustomer `json:"customer"`
+	Voucher  string   `json:"voucher"`
+	Customer Customer `json:"customer"`
 }
 
 type Vouchers struct {

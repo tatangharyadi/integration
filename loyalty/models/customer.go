@@ -32,3 +32,7 @@ type Customer struct {
 	PersonalCredit Credit    `json:"personal_credit"`
 	Vouchers       []Voucher `json:"vouchers"`
 }
+
+type Customers struct {
+	Customers []Customer `json:"customers"`
+}
