@@ -365,6 +365,34 @@ paths:
             type: "array"
             items:
               $ref: "#/definitions/Customer"
+  /voucherify/redeem:
+    post:
+      tags:
+        - "voucherify"
+      summary: "Redeem voucher"
+      operationId: "redeemVoucher"
+      x-google-backend:
+        address: https://integration-loyalty-238488984298.asia-southeast2.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+      security:
+        - api_key: []
+      produces:
+        - "application/json"
+      parameters:
+        - name: "body"
+          in: "body"
+          description: "Redeem object"
+          required: true
+          schema:
+            $ref: "#/definitions/Redeem"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Redemption"
+      
   /voucherify/creditcustomer/{id}:
     post:
       tags:
@@ -641,6 +669,10 @@ definitions:
         $ref: "#/definitions/Credit"
       personal_credit:
         $ref: "#/definitions/Credit"
+      vouchers:
+        type: "array"
+        items:
+          $ref: "#/definitions/Voucher"
   Credit:
     type: "object"
     properties:
@@ -665,6 +697,77 @@ definitions:
       amount:
         type: "number"
         format: "float"
+  Voucher:
+    type: "object"
+    required:
+      - "code"
+    properties:
+      code:
+        type: "string"
+        example: "GPAS-123-MEAL"
+      category:
+        type: "string"
+        example: "MEAL_BENEFIT"
+      type:
+        type: "string"
+        example: "DISCOUNT_VOUCHER"
+      discount:
+        $ref: "#/definitions/VoucherDiscount"
+      active:
+        type: "boolean"
+  VoucherDiscount:
+    type: "object"
+    properties:
+      type: 
+        type: "string"
+        example: "PERCENT"
+      perent_off:
+        type: "integer"
+        format: "int64"
+
+  Order:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+        example: "ORDER-123"
+      amount:
+        type: "number"
+        format: "float"
+      discount:
+        type: "number"
+        format: "float"
+
+  Redeem:
+    type: "object"
+    properties:
+      redeemables:
+        type: array
+        items:
+          $ref: "#/definitions/Redeemable"
+      order:
+        $ref: "#/definitions/Order"
+      customer:
+        $ref: "#/definitions/Customer"
+  Redeemable:
+    type: "object"
+    properties:
+      object:
+        type: "string"
+        example: "voucher"
+      id:
+        type: "string"
+        example: "GPAS-123-MEAL"
+  Redemption:
+    type: "object"
+    properties:
+      voucher:
+        $ref: "#/definitions/Voucher"
+      order:
+        $ref: "#/definitions/Order"
+      status:
+        type: "string"
+        example: "SUCCEEDED"
         
   QrPayment:
     type: "object"
