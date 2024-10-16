@@ -40,9 +40,15 @@ func mapRedemption(voucherifyRedemptions []voucherify.Redemption) []models.Redem
 		redemptions = append(redemptions, models.Redemption{
 			Voucher: models.Voucher{
 				Code: voucherifyRedemption.Voucher.Code,
+				Discount: models.VoucherDiscount{
+					Type:       voucherifyRedemption.Voucher.Discount.Type,
+					PercentOff: voucherifyRedemption.Voucher.Discount.PercentOff,
+				},
 			},
 			Order: models.Order{
-				Id: voucherifyRedemption.Order.SourceId,
+				Id:       voucherifyRedemption.Order.SourceId,
+				Amount:   voucherifyRedemption.Order.Amount,
+				Discount: voucherifyRedemption.Order.TotalDiscountAmount,
 			},
 			Status: voucherifyRedemption.Status,
 		})

@@ -7,10 +7,10 @@ type VoucherDiscount struct {
 
 type Voucher struct {
 	Code     string          `json:"code"`
-	Category string          `json:"category"`
-	Type     string          `json:"type"`
-	Discount VoucherDiscount `json:"discount"`
-	Active   bool            `json:"active"`
+	Category string          `json:"category,omitempty"`
+	Type     string          `json:"type,omitempty"`
+	Discount VoucherDiscount `json:"discount,omitempty"`
+	Active   bool            `json:"active,omitempty"`
 }
 
 type Credit struct {

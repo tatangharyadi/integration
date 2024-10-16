@@ -1,14 +1,14 @@
 package models
 
-type Redeemables struct {
+type Redeemable struct {
 	Object string `json:"object"`
 	Id     string `json:"id"`
 }
 
 type Redeem struct {
-	Redeemables []Redeemables `json:"redeemables"`
-	Order       Order         `json:"order"`
-	Customer    Customer      `json:"customer"`
+	Redeemables []Redeemable `json:"redeemables"`
+	Order       Order        `json:"order"`
+	Customer    Customer     `json:"customer"`
 }
 
 type Redemption struct {
